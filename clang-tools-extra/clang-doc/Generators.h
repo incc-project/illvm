@@ -14,7 +14,13 @@
 
 #include "Representation.h"
 #include "llvm/Support/Error.h"
+#include "llvm/Support/JSON.h"
+#include "llvm/Support/Mustache.h"
 #include "llvm/Support/Registry.h"
+
+using namespace llvm;
+using namespace llvm::json;
+using namespace llvm::mustache;
 
 namespace clang {
 namespace doc {
@@ -51,6 +57,83 @@ llvm::Expected<std::unique_ptr<Generator>>
 findGeneratorByName(llvm::StringRef Format);
 
 std::string getTagType(TagTypeKind AS);
+
+Error createFileOpenError(StringRef FileName, std::error_code EC);
+
+class MustacheTemplateFile {
+  BumpPtrAllocator Allocator;
+  StringSaver Saver;
+  MustacheContext Ctx;
+  Template T;
+  std::unique_ptr<MemoryBuffer> Buffer;
+
+public:
+  static Expected<std::unique_ptr<MustacheTemplateFile>>
+  createMustacheFile(StringRef FileName) {
+    ErrorOr<std::unique_ptr<MemoryBuffer>> BufferOrError =
+        MemoryBuffer::getFile(FileName);
+    if (auto EC = BufferOrError.getError())
+      return createFileOpenError(FileName, EC);
+    return std::make_unique<MustacheTemplateFile>(
+        std::move(BufferOrError.get()));
+  }
+
+  Error registerPartialFile(StringRef Name, StringRef FileName) {
+    ErrorOr<std::unique_ptr<MemoryBuffer>> BufferOrError =
+        MemoryBuffer::getFile(FileName);
+    if (auto EC = BufferOrError.getError())
+      return createFileOpenError(FileName, EC);
+
+    std::unique_ptr<MemoryBuffer> Buffer = std::move(BufferOrError.get());
+    StringRef FileContent = Buffer->getBuffer();
+    T.registerPartial(Name.str(), FileContent.str());
+    return Error::success();
+  }
+
+  void render(json::Value &V, raw_ostream &OS) { T.render(V, OS); }
+
+  MustacheTemplateFile(std::unique_ptr<MemoryBuffer> &&B)
+      : Saver(Allocator), Ctx(Allocator, Saver), T(B->getBuffer(), Ctx),
+        Buffer(std::move(B)) {}
+};
+
+struct MustacheGenerator {
+  Expected<std::string> getInfoTypeStr(Object *Info, StringRef Filename);
+
+  /// Used to find the relative path from the file to the format's docs root.
+  /// Mainly used for the HTML resource paths.
+  SmallString<128> getRelativePathToRoot(StringRef PathToFile,
+                                         StringRef DocsRootPath);
+  virtual ~MustacheGenerator() = default;
+
+  /// Initializes the template files from disk and calls setupTemplate to
+  /// register partials
+  virtual Error setupTemplateFiles(const ClangDocContext &CDCtx) = 0;
+
+  /// Populates templates with data from JSON and calls any specifics for the
+  /// format. For example, for HTML it will render the paths for CSS and JS.
+  virtual Error generateDocForJSON(json::Value &JSON, raw_fd_ostream &OS,
+                                   const ClangDocContext &CDCtx,
+                                   StringRef ObjectTypeStr,
+                                   StringRef RelativeRootPath) = 0;
+
+  /// Registers partials to templates.
+  Error setupTemplate(std::unique_ptr<MustacheTemplateFile> &Template,
+                      StringRef TemplatePath,
+                      std::vector<std::pair<StringRef, StringRef>> Partials);
+
+  /// \brief The main orchestrator for Mustache-based documentation.
+  ///
+  /// 1. Initializes templates files from disk by calling setupTemplateFiles.
+  /// 2. Calls the JSON generator to write JSON to disk.
+  /// 3. Iterates over the JSON files, recreates the directory structure from
+  /// JSON, and calls generateDocForJSON for each file.
+  /// 4. A file of the desired format is created.
+  Error generateDocumentation(StringRef RootDir,
+                              StringMap<std::unique_ptr<doc::Info>> Infos,
+                              const clang::doc::ClangDocContext &CDCtx,
+                              std::string DirName);
+};
 
 // This anchor is used to force the linker to link in the generated object file
 // and thus register the generators.
