@@ -260,6 +260,10 @@ public:
   void deserialize(llvm::json::Object &root) override;
 };
 
+class SourceRangeCheckMetaData final : public MetaData {
+public:
+};
+
 class DumpMetaData final : public MetaData {
 public:
 };

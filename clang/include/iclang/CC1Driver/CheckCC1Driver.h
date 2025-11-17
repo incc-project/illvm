@@ -25,6 +25,11 @@ public:
   static void run();
 };
 
+class SourceRangeCheckCC1Driver {
+public:
+  static void run();
+};
+
 class DumpCC1Driver {
 public:
   static void run();

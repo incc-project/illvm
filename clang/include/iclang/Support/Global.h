@@ -15,6 +15,11 @@
 // * "ShareClient": client mode of shared compilation optimization.
 // * "ShareCheck": share check mode for IClang developers.
 // * "LineMacroCheck": Check line macro.
+// * "SourceRangeCheck": Dump AST source range in compile.json, filter:
+//    * In main file.
+//    * Not implicit.
+//    * Is not instantiation, specialization.
+//    * Top-level-class, top-level-function, top-level-template.
 // * "Dump": AST dump mode.
 // * "Profile": profile Clang.
 // * "Clang": default, equivalent to Clang.
@@ -43,6 +48,7 @@ enum class IClangMode {
   ShareCheckMode,
   DumpMode,
   LineMacroCheckMode,
+  SourceRangeCheckMode,
   ProfileMode,
   ClangMode
 };
@@ -97,6 +103,8 @@ public:
       metaData = illvm::make_owner<ShareCheckMetaData>().moveTo<MetaData>();
     } else if (iClangMode == IClangMode::LineMacroCheckMode) {
       metaData = illvm::make_owner<LineMacroCheckMetaData>().moveTo<MetaData>();
+    } else if (iClangMode == IClangMode::SourceRangeCheckMode) {
+      metaData = illvm::make_owner<SourceRangeCheckMetaData>().moveTo<MetaData>();
     } else if (iClangMode == IClangMode::DumpMode) {
       metaData = illvm::make_owner<DumpMetaData>().moveTo<MetaData>();
     } else if (iClangMode == IClangMode::ProfileMode) {
@@ -127,6 +135,8 @@ public:
       iClangMode = IClangMode::ShareCheckMode;
     } else if (iClangModeStr == "LineMacroCheck") {
       iClangMode = IClangMode::LineMacroCheckMode;
+    } else if (iClangModeStr == "SourceRangeCheck") {
+      iClangMode = IClangMode::SourceRangeCheckMode;
     } else if (iClangModeStr == "Dump") {
       iClangMode = IClangMode::DumpMode;
     } else if (iClangModeStr == "Profile") {

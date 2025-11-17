@@ -16,6 +16,13 @@ int LineMacroCheckDriver::run(
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
+int SourceRangeCheckDriver::run(
+    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
+    const clang::driver::Driver &clangDriver) {
+  assert(global.getIClangMode() == IClangMode::SourceRangeCheckMode);
+  return DriverBase::runBase(global, originalArgv, clangDriver);
+}
+
 int DumpDriver::run(Global &global,
                  const llvm::SmallVector<const char *, 128> &originalArgv,
                  const clang::driver::Driver &clangDriver) {

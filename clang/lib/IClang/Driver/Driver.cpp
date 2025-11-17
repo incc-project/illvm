@@ -44,6 +44,9 @@ int Driver::run(const clang::driver::Action::ActionClass &kind,
   if (iClangMode == IClangMode::LineMacroCheckMode) {
     return LineMacroCheckDriver::run(global, originalArgv, clangDriver);
   }
+  if (iClangMode == IClangMode::SourceRangeCheckMode) {
+    return SourceRangeCheckDriver::run(global, originalArgv, clangDriver);
+  }
   if (iClangMode == IClangMode::DumpMode) {
     return DumpDriver::run(global, originalArgv, clangDriver);
   }

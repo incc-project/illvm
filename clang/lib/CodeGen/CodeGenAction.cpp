@@ -336,6 +336,8 @@ namespace clang {
           iclang::LineMacroCheckCC1Driver::run();
         } else if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
           iclang::IncLineCheckCC1Driver::run();
+        } else if (global.isIClangMode(iclang::IClangMode::SourceRangeCheckMode)) {
+          iclang::SourceRangeCheckCC1Driver::run();
         } else if (global.isIClangMode(iclang::IClangMode::DumpMode)) {
           iclang::DumpCC1Driver::run();
         } else if (global.isIClangMode(iclang::IClangMode::ProfileMode)) {

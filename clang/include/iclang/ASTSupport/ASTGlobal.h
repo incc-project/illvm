@@ -90,10 +90,7 @@ public:
 
   illvm::SourceInterval getDeclSourceInterval(const clang::Decl *decl) const;
 
-  bool isMainFileDecl(const clang::Decl *decl) const {
-    const auto loc = decl->getLocation();
-    return loc.isValid() && getSourceManager().isInMainFile(loc);
-  }
+  bool isMainFileDecl(const clang::Decl *decl) const;
 
   std::string dumpDecl(const clang::Decl *decl) const;
 
@@ -101,69 +98,11 @@ public:
     return getSourceManager().getCharacterData(loc);
   }
 
-  static bool hasAutoReturn(const clang::FunctionDecl *FD) {
-    const clang::QualType RT = FD->getReturnType();
-    const clang::Type *T = RT.getTypePtr();
+  static bool hasAutoReturn(const clang::FunctionDecl *FD);
 
-    if (llvm::dyn_cast<clang::AutoType>(T) != nullptr) {
-      return true;
-    }
+  bool isValidFuncHeader(const clang::FunctionDecl *funcDecl) const;
 
-    if (const clang::DeducedType *DT = T->getContainedDeducedType()) {
-      if (llvm::isa<clang::AutoType>(DT)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  bool isValidFuncHeader(const clang::FunctionDecl *funcDecl) const {
-    if (funcDecl->isImplicit() || !isMainFileDecl(funcDecl) ||
-        funcDecl->getLinkageAndVisibility().getLinkage() ==
-            clang::Linkage::UniqueExternalLinkage ||
-        funcDecl->isTemplated() || funcDecl->isTemplateInstantiation() ||
-        funcDecl->isFunctionTemplateSpecialization() ||
-        llvm::dyn_cast<clang::CXXConstructorDecl>(funcDecl) != nullptr ||
-        llvm::dyn_cast<clang::CXXDestructorDecl>(funcDecl) != nullptr ||
-        funcDecl->getOverloadedOperator() !=
-            clang::OverloadedOperatorKind::OO_None ||
-        llvm::dyn_cast<clang::CXXConversionDecl>(funcDecl) != nullptr ||
-        funcDecl->isConstexpr() ||
-        hasAutoReturn(funcDecl) ||
-        funcDecl->hasAttr<clang::AlwaysInlineAttr>() ||
-        funcDecl->hasAttr<clang::ConstructorAttr>() ||
-        funcDecl->hasAttr<clang::DestructorAttr>()) {
-      return false;
-    }
-    if (const clang::CXXMethodDecl *cxxMethodDecl =
-            llvm::dyn_cast<const clang::CXXMethodDecl>(funcDecl)) {
-      if (cxxMethodDecl->isVirtual()) {
-        return false;
-      }
-      if (!cxxMethodDecl->isOutOfLine()) {
-        return false;
-      }
-    }
-    if (getMangledName(funcDecl).empty()) {
-      return false;
-    }
-    return true;
-  }
-
-  bool isValidFuncBody(const clang::FunctionDecl *funcDecl) const {
-    const auto compoundStmt =
-     llvm::dyn_cast<clang::CompoundStmt>(funcDecl->getBody());
-    if (compoundStmt == nullptr || compoundStmt->getLBracLoc().isInvalid()) {
-      return false;
-    }
-    const auto loc = compoundStmt->getLBracLoc();
-    const char *locChar = dumpOriginalCode(loc);
-    if (locChar == nullptr || *locChar != '{') {
-      return false;
-    }
-    return true;
-  }
+  bool isValidFuncBody(const clang::FunctionDecl *funcDecl) const;
 };
 
 } // namespace iclang

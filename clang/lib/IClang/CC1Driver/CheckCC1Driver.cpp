@@ -41,6 +41,10 @@ void LineMacroCheckCC1Driver::run() {
       lineMacroCheckAnalysis.getFuncWithLineMacroNum();
 }
 
+void SourceRangeCheckCC1Driver::run() {
+  llvm::errs() << "hello source range checker\n";
+}
+
 void DumpCC1Driver::run() {
   auto &global = Global::getInstance();
 
