@@ -7112,3 +7112,9 @@ def dxc_entrypoint : Option<["--", "/", "-"], "E", KIND_JOINED_OR_SEPARATE>,
                      Group<dxc_Group>,
                      Flags<[DXCOption, NoXarchOption]>,
                      HelpText<"Entry point name">;
+
+// IClang begin
+def iclang : Joined<["-"], "iclang=">,
+    HelpText<"Enable IClang with the provided mode or config file">,
+    Flags<[NoArgumentUnused, CC1Option]>;
+// IClang end

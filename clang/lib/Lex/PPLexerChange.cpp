@@ -24,6 +24,11 @@
 #include "llvm/Support/Path.h"
 #include <optional>
 
+// IClang begin
+#include "iclang/Support/Global.h"
+#include "illvm/Support/FileSystem.h"
+// IClang end
+
 using namespace clang;
 
 //===----------------------------------------------------------------------===//
@@ -91,6 +96,27 @@ bool Preprocessor::EnterSourceFile(FileID FID, ConstSearchDirIterator CurDir,
     CodeCompletionLoc =
         CodeCompletionFileLoc.getLocWithOffset(CodeCompletionOffset);
   }
+
+  // IClang begin
+  auto &global = iclang::Global::getInstance();
+  if (global.isIClangMode(iclang::IClangMode::IncMode)) {
+    auto metaData = global.getMetaData<iclang::IncMetaData>();
+    if (metaData->skipTopIncludeRegionFlag &&
+        FID == SourceMgr.getMainFileID()) {
+      metaData->hackedMainBuffer = InputFile->getBuffer().str();
+      metaData->hackedMainBuffer = metaData->hackMainBuffer(
+          metaData->hackedMainBuffer, metaData->topIncludeRegion);
+      metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
+      if (global.isIClangMode(iclang::IClangMode::IncCheckMode)) {
+        const auto testMetaData = metaData.copyTo<iclang::IncCheckMetaData>();
+        illvm::FileSystem::saveStr(testMetaData->cacheSrcPath,
+                                   metaData->hackedMainBuffer);
+      }
+      InputFile = llvm::MemoryBufferRef(metaData->hackedMainBufferRef,
+                                        InputFile->getBufferIdentifier());
+        }
+  }
+  // IClang end
 
   Lexer *TheLexer = new Lexer(FID, *InputFile, *this, IsFirstIncludeOfFile);
   if (getPreprocessorOpts().DependencyDirectivesForFile &&

@@ -71,6 +71,10 @@
 #include "llvm/Support/xxhash.h"
 #include <optional>
 
+// IClang begin
+  #include "iclang/ASTSupport/ASTGlobal.h"
+// IClang end
+
 using namespace clang;
 using namespace CodeGen;
 
@@ -3610,6 +3614,20 @@ void CodeGenModule::EmitGlobalDefinition(GlobalDecl GD, llvm::GlobalValue *GV) {
   PrettyStackTraceDecl CrashInfo(const_cast<ValueDecl *>(D), D->getLocation(),
                                  Context.getSourceManager(),
                                  "Generating code for declaration");
+
+  // IClang begin
+  auto &global = iclang::Global::getInstance();
+  if (global.isIClangMode(iclang::IClangMode::ShareCheckMode)) {
+    const auto metaData = global.getMetaData<iclang::ShareCheckMetaData>();
+    const auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(D);
+    if (metaData->enableRefedSymbolAnalysisFlag && funcDecl) {
+      auto &astGlobal = iclang::ASTGlobal::getInstance();
+      auto astMetaData =
+          astGlobal.getASTMetaData<iclang::ShareCheckASTMetaData>();
+      astMetaData->addEmitGlobalFuncDef(funcDecl);
+    }
+  }
+  // IClang end
 
   if (const auto *FD = dyn_cast<FunctionDecl>(D)) {
     // At -O0, don't generate IR for functions with available_externally

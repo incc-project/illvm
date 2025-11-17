@@ -28,6 +28,9 @@ set(LLVM_LINK_COMPONENTS
   Target
   TargetParser
   TransformUtils
+  # IClang begin
+  ILLVMSupport
+  # IClang end
   )
 
 add_clang_library(clangCodeGen
@@ -99,4 +102,9 @@ add_clang_library(clangCodeGen
   clangFrontend
   clangLex
   clangSerialization
+  # IClang begin
+  clangIClangSupport
+  clangIClangASTSupport
+  clangIClangCC1Driver
+  # IClang end
   )

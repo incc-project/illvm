@@ -24,6 +24,10 @@
 #include "llvm/ADT/STLExtras.h"
 #include <optional>
 
+// IClang begin.
+#include "iclang/ASTSupport/ASTGlobal.h"
+// IClang end.
+
 using namespace clang;
 
 //===----------------------------------------------------------------------===//
@@ -2435,6 +2439,19 @@ Decl *Parser::ParseFunctionStatementBody(Decl *Decl, ParseScope &BodyScope) {
   assert(Tok.is(tok::l_brace));
   SourceLocation LBraceLoc = Tok.getLocation();
 
+  // IClang begin.
+  auto funcDecl = llvm::dyn_cast<FunctionDecl>(Decl);
+  auto &global = iclang::Global::getInstance();
+  auto &astGlobal = iclang::ASTGlobal::getInstance();
+  bool isValid = global.isIClangMode(iclang::IClangMode::IncLineCheckMode) &&
+                 funcDecl != nullptr && astGlobal.isValidFuncHeader(funcDecl);
+  if (isValid) {
+    // llvm::errs() << "Enter Func " << astGlobal.dumpDecl(funcDecl) << "\n";
+    auto metadata = global.getMetaData<iclang::IncLineCheckMetaData>();
+    metadata->isValidFunctionStack.push_back(true);
+  }
+  // IClang end.
+
   PrettyDeclStackTraceEntry CrashInfo(Actions.Context, Decl, LBraceLoc,
                                       "parsing function body");
 
@@ -2457,6 +2474,15 @@ Decl *Parser::ParseFunctionStatementBody(Decl *Decl, ParseScope &BodyScope) {
   }
 
   BodyScope.Exit();
+
+  // IClang begin.
+  if (isValid) {
+    // llvm::errs() << "Exit Func " << astGlobal.dumpDecl(funcDecl) << "\n";
+    auto metadata = global.getMetaData<iclang::IncLineCheckMetaData>();
+    metadata->isValidFunctionStack.pop_back();
+  }
+  // IClang end.
+
   return Actions.ActOnFinishFunctionBody(Decl, FnBody.get());
 }
 

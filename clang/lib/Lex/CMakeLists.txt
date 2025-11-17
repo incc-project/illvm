@@ -3,6 +3,9 @@
 set(LLVM_LINK_COMPONENTS
   Support
   TargetParser
+  # IClang begin
+  ILLVMSupport
+  # IClang end
   )
 
 add_clang_library(clangLex
@@ -32,4 +35,7 @@ add_clang_library(clangLex
 
   LINK_LIBS
   clangBasic
+  # IClang begin
+  clangIClangSupport
+  # IClang end
   )

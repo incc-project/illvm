@@ -70,6 +70,10 @@
 #include <utility>
 #include <vector>
 
+// IClang begin.
+#include "iclang/Support/Global.h"
+// IClang end.
+
 using namespace clang;
 
 LLVM_INSTANTIATE_REGISTRY(PragmaHandlerRegistry)
@@ -785,6 +789,64 @@ void Preprocessor::updateOutOfDateIdentifier(IdentifierInfo &II) const {
 bool Preprocessor::HandleIdentifier(Token &Identifier) {
   assert(Identifier.getIdentifierInfo() &&
          "Can't handle identifiers without identifier info!");
+
+  // IClang begin
+  auto handleMacro = [&Identifier, this]() {
+    auto &global = iclang::Global::getInstance();
+    if (!global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
+      return;
+    }
+    auto metaData = global.getMetaData<iclang::IncLineCheckMetaData>();
+
+    if (metaData->hashHashFlag) {
+      return;
+    }
+
+    const IdentifierInfo &ii = *Identifier.getIdentifierInfo();
+    const MacroDefinition MD = getMacroDefinition(&ii);
+    if (!MD) {
+      return;
+    }
+    const auto *MI = MD.getMacroInfo();
+    assert(MI && "macro definition with no macro info?");
+    if (DisableMacroExpansion) {
+      return;
+    }
+    if (Identifier.isExpandDisabled() || !MI->isEnabled()) {
+      return;
+    }
+    if (MI->isFunctionLike() && !isNextPPTokenLParen()) {
+      return;
+    }
+
+    const auto inValidMacroFlag =
+        metaData->inValidMacro.find(ii.getName().str()) !=
+        metaData->inValidMacro.end();
+    if (metaData->isValidFunctionStack.empty()) {
+      if (inValidMacroFlag) {
+        metaData->hashHashFlag = true;
+      } else if (ii.getName().str() == "__LINE__") {
+        Identifier.setKind(tok::raw_identifier);
+        Identifier.setRawIdentifierData(metaData->iClangLineWrapper);
+        LookUpIdentifierInfo(Identifier);
+      }
+      return;
+    }
+    if (!metaData->isValidFunctionStack.back()) {
+      return;
+    }
+
+    if (inValidMacroFlag) {
+      metaData->isValidFunctionStack.back() = false;
+    } else if (ii.getName().str() == "__LINE__") {
+      Identifier.setKind(tok::raw_identifier);
+      Identifier.setRawIdentifierData(metaData->iClangLineWrapper);
+      LookUpIdentifierInfo(Identifier);
+    }
+  };
+
+  handleMacro();
+  // IClang end
 
   IdentifierInfo &II = *Identifier.getIdentifierInfo();
 

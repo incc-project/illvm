@@ -69,6 +69,10 @@ if config.clang_examples:
     config.available_features.add('examples')
 
 def have_host_jit_feature_support(feature_name):
+    # IClang begin
+    # Affects the efficiency of WSL testing, temporarily shuts down
+    return False
+    # IClang end
     clang_repl_exe = lit.util.which('clang-repl', config.clang_tools_dir)
 
     if not clang_repl_exe:
@@ -286,3 +290,13 @@ if 'system-aix' in config.available_features:
 # possibly be present in system and user configuration files, so disable
 # default configs for the test runs.
 config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"
+
+# IClang begin
+config.substitutions.append(('%illvm-test', os.path.join(config.llvm_obj_root, 'bin', 'illvm-test')))
+config.substitutions.append((
+    "%iclangtest-linemacrocheck",
+    os.path.join(config.llvm_obj_root, 'bin', 'clang++') +
+    " -c -ffunction-sections -fdata-sections -o %S/test.o -c %S/test.cpp " +
+    "-iclang=\"LineMacroCheck\""
+))
+# IClang end

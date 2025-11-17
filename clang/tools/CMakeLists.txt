@@ -51,3 +51,7 @@ add_clang_subdirectory(libclang)
 
 add_clang_subdirectory(amdgpu-arch)
 add_clang_subdirectory(nvptx-arch)
+
+# IClang begin
+add_clang_subdirectory(iclang-tool)
+# IClang end

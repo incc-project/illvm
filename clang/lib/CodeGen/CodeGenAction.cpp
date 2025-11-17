@@ -53,6 +53,14 @@
 using namespace clang;
 using namespace llvm;
 
+// IClang begin
+#include "iclang/ASTSupport/ASTGlobal.h"
+#include "iclang/CC1Driver/CheckCC1Driver.h"
+#include "iclang/CC1Driver/ShareCC1Driver.h"
+#include "iclang/Support/Global.h"
+#include "illvm/Support/Time.h"
+// IClang end
+
 #define DEBUG_TYPE "codegenaction"
 
 namespace clang {
@@ -314,6 +322,27 @@ namespace clang {
 
         IRGenFinished = true;
       }
+
+      // IClang begin
+      auto &global = iclang::Global::getInstance();
+      if (!global.isIClangMode(iclang::IClangMode::ClangMode)) {
+        auto metaData = global.getMetaData<iclang::MetaData>();
+        metaData->midTs = illvm::Time::currentTsMs();
+        metaData->frontTimeMs = metaData->midTs - metaData->startTs;
+
+        if (global.isIClangMode(iclang::IClangMode::ShareCheckMode)) {
+          iclang::ShareCheckCC1Driver::run();
+        } else if (global.isIClangMode(iclang::IClangMode::LineMacroCheckMode)) {
+          iclang::LineMacroCheckCC1Driver::run();
+        } else if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
+          iclang::IncLineCheckCC1Driver::run();
+        } else if (global.isIClangMode(iclang::IClangMode::DumpMode)) {
+          iclang::DumpCC1Driver::run();
+        } else if (global.isIClangMode(iclang::IClangMode::ProfileMode)) {
+          iclang::ProfileCC1Driver::run();
+        }
+      }
+      // IClang end
 
       // Silently ignore if we weren't initialized for some reason.
       if (!getModule())

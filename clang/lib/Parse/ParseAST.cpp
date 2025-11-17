@@ -26,6 +26,11 @@
 #include <cstdio>
 #include <memory>
 
+// IClang begin
+#include "iclang/Support/Global.h"
+#include "iclang/ASTSupport/ASTGlobal.h"
+// IClang end
+
 using namespace clang;
 
 namespace {
@@ -112,6 +117,17 @@ void clang::ParseAST(Preprocessor &PP, ASTConsumer *Consumer,
 }
 
 void clang::ParseAST(Sema &S, bool PrintStats, bool SkipFunctionBodies) {
+
+  // IClang begin
+  const auto &global = iclang::Global::getInstance();
+  auto &astGlobal = iclang::ASTGlobal::getInstance();
+  astGlobal.init(global, &S);
+  if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
+    iclang::IncLineCheckASTMetaData::injectIClangLineWMacro(S);
+    iclang::IncLineCheckASTMetaData::injectIClangLineFunc(S);
+  }
+  // IClang end
+
   // Collect global stats on Decls/Stmts (until we have a module streamer).
   if (PrintStats) {
     Decl::EnableStatistics();

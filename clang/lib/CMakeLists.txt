@@ -30,3 +30,7 @@ if(CLANG_INCLUDE_TESTS)
 endif()
 add_subdirectory(Interpreter)
 add_subdirectory(Support)
+
+# IClang begin
+add_subdirectory(IClang)
+# IClang end

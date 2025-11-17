@@ -66,3 +66,7 @@ endif()
 # Component post-processing
 LLVMBuildResolveComponentsLink()
 LLVMBuildGenerateCFragment(OUTPUT ${LLVMCONFIGLIBRARYDEPENDENCIESINC})
+
+# ILLVM begin
+add_subdirectory(ILLVM)
+# ILLVM end

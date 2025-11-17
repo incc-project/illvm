@@ -47,6 +47,10 @@
 #include <tuple>
 #include <utility>
 
+// IClang begin
+#include "iclang/Support/Global.h"
+// IClang end
+
 using namespace clang;
 
 //===----------------------------------------------------------------------===//
@@ -1858,6 +1862,48 @@ bool Lexer::LexIdentifierContinue(Token &Result, const char *CurPtr) {
   const char *IdStart = BufferPtr;
   FormTokenWithChars(Result, CurPtr, tok::raw_identifier);
   Result.setRawIdentifierData(IdStart);
+
+  // IClang begin
+  auto iClangStrNCmp = [](const char *src, const char *srcEnd, const char *dest) -> bool {
+    const unsigned destLen = strlen(dest);
+    if (srcEnd - src < destLen) {
+      return false;
+    }
+    return strncmp(src, dest, destLen) == 0;
+  };
+
+  auto isValidBuiltinLine = [](const char *src, const char *const srcEnd) -> const char* {
+    while (src < srcEnd && std::isspace(*src)) {
+      src++;
+    }
+    if (src >= srcEnd || *src != '(') {
+      return nullptr;
+    }
+    src++;
+    while (src < srcEnd && std::isspace(*src)) {
+      src++;
+    }
+    if (src >= srcEnd || *src != ')') {
+      return nullptr;
+    }
+    return src + 1;
+  };
+
+
+  auto &global = iclang::Global::getInstance();
+  if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
+    const auto &metaData = global.getMetaData<iclang::IncLineCheckMetaData>();
+    if (iClangStrNCmp(IdStart, BufferEnd, "__builtin_LINE")) {
+      const auto endPos = isValidBuiltinLine(CurPtr, BufferEnd);
+      if (endPos != nullptr) {
+        Result.setLength(strlen(metaData->lineMacro));
+        Result.setRawIdentifierData(metaData->lineMacro);
+        CurPtr = endPos;
+        BufferPtr = CurPtr;
+      }
+    }
+  }
+  // IClang end
 
   // If we are in raw mode, return this identifier raw.  There is no need to
   // look up identifier information or attempt to macro expand it.

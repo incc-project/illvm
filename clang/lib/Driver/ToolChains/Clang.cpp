@@ -4797,6 +4797,10 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     }
   }
 
+  // IClang begin
+  Args.AddLastArg(CmdArgs, options::OPT_iclang);
+  // IClang end
+
   if (const Arg *A = Args.getLastArg(options::OPT_fthinlto_index_EQ)) {
     if (!types::isLLVMIR(Input.getType()))
       D.Diag(diag::err_drv_arg_requires_bitcode_input) << A->getAsString(Args);

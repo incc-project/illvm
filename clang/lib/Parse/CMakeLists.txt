@@ -4,6 +4,9 @@ set(LLVM_LINK_COMPONENTS
   MCParser
   Support
   TargetParser
+  # IClang begin
+  ILLVMSupport
+  # IClang end
   )
 
 add_clang_library(clangParse
@@ -32,4 +35,8 @@ add_clang_library(clangParse
 
   DEPENDS
   omp_gen
+  # IClang begin
+  clangIClangSupport
+  clangIClangASTSupport
+  # IClang end
   )

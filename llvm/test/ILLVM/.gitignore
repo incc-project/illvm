@@ -1,0 +1,7 @@
+*.o
+a.out
+*.log
+*.script
+/debug
+/Debug
+.lit_test_times.txt
