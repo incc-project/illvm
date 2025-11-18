@@ -113,7 +113,7 @@ runBase(illvm::BPtr<IncMetaData> &metaData,
   sema.PerformPendingInstantiations();
 }
 
-void IncCC1Driver::run() {
+void IncCC1Driver::extRun() {
   auto &global = Global::getInstance();
 
   assert(global.getIClangMode() == IClangMode::IncMode);
@@ -125,7 +125,7 @@ void IncCC1Driver::run() {
   runBase(metaData, std::nullopt, astGlobal);
 }
 
-void IncCheckCC1Driver::run() {
+void IncCheckCC1Driver::extRun() {
   auto &global = Global::getInstance();
 
   assert(global.getIClangMode() == IClangMode::IncCheckMode);

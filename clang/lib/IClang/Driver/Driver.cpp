@@ -23,38 +23,16 @@ int Driver::run(const clang::driver::Action::ActionClass &kind,
   }
 
   const auto iClangMode = global.getIClangMode();
-  if (iClangMode == IClangMode::IncMode) {
-    return IncDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::IncCheckMode) {
-    return IncCheckDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::IncLineCheckMode) {
-    return IncLineCheckDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::ShareMasterMode) {
-    return ShareMasterDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::ShareClientMode) {
-    return ShareClientDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::ShareCheckMode) {
-    return ShareCheckDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::LineMacroCheckMode) {
-    return LineMacroCheckDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::SourceRangeCheckMode) {
-    return SourceRangeCheckDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::DumpMode) {
-    return DumpDriver::run(global, originalArgv, clangDriver);
-  }
-  if (iClangMode == IClangMode::ProfileMode) {
-    return ProfileDriver::run(global, originalArgv, clangDriver);
+
+#define ICLANG_DRIVER_RUN(X)                                                   \
+  case IClangMode::X##Mode:                                                    \
+    return X##Driver::run(global, originalArgv, clangDriver);
+
+  switch (iClangMode) {
+    ICLANG_MODES(ICLANG_DRIVER_RUN)
   }
 
-  return DriverBase::clangCompile(clangDriver, originalArgv);
+  ILLVM_FCHECK(false, "Unreachable");
 }
 
 } // namespace iclang

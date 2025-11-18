@@ -20,12 +20,16 @@ namespace iclang {
 
 class IncCC1Driver {
 public:
-  static void run();
+  static void extRun();
+
+  static void run() {}
 };
 
 class IncCheckCC1Driver {
 public:
-  static void run();
+  static void extRun();
+
+  static void run() {}
 };
 
 } // namespace iclang

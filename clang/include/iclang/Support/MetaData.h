@@ -29,6 +29,8 @@ enum IClangDir {
 
 class MetaData {
 public:
+  std::string iClangMode = "";
+
   bool recoverFlag = false;
 
   std::string recoverReason = "";
@@ -90,6 +92,7 @@ public:
   virtual ~MetaData() = default;
 
   // Format:
+  // iClangMode
   // recoverFlag
   // recoverReason
   // currentPath
@@ -286,6 +289,9 @@ public:
 class ProfileMetaData final : public MetaData {
 public:
 };
+
+// Placeholder
+using ClangMetaData = MetaData;
 
 } // namespace iclang
 

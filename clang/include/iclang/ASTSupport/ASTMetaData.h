@@ -70,6 +70,9 @@ class ProfileASTMetaData final : public ASTMetaData {
 public:
 };
 
+// Placeholder
+using ClangASTMetaData = ASTMetaData;
+
 } // namespace iclang
 
 #endif // ICLANG_ASTMETADATA_H

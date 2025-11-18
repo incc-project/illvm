@@ -28,6 +28,8 @@ Global::loadMetaDataFromFile(const std::string &filepath,
   auto metaData = createMetaData(iClangMode);
   metaData->deserialize(root);
 
+  ILLVM_FCHECK(metaData->iClangMode == iClangModeToString(iClangMode), "");
+
   return metaData;
 }
 

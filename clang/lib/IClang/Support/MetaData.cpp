@@ -34,6 +34,8 @@ std::string MetaData::hackMainBuffer(const std::string &originalBuffer,
 llvm::json::Object MetaData::serialize() const {
   llvm::json::Object root;
 
+  root["iClangMode"] = iClangMode;
+
   root["recoverFlag"] = recoverFlag;
   root["recoverReason"] = recoverReason;
 
@@ -50,6 +52,8 @@ llvm::json::Object MetaData::serialize() const {
 }
 
 void MetaData::deserialize(llvm::json::Object &root) {
+  iClangMode = root["iClangMode"].getAsString().value().str();
+
   recoverFlag = root["recoverFlag"].getAsBoolean().value();
   recoverReason = root["recoverReason"].getAsString().value();
 

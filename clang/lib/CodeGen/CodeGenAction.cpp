@@ -56,6 +56,7 @@ using namespace llvm;
 // IClang begin
 #include "iclang/ASTSupport/ASTGlobal.h"
 #include "iclang/CC1Driver/CheckCC1Driver.h"
+#include "iclang/CC1Driver/IncCC1Driver.h"
 #include "iclang/CC1Driver/ShareCC1Driver.h"
 #include "iclang/Support/Global.h"
 #include "illvm/Support/Time.h"
@@ -325,24 +326,20 @@ namespace clang {
 
       // IClang begin
       auto &global = iclang::Global::getInstance();
-      if (!global.isIClangMode(iclang::IClangMode::ClangMode)) {
+      auto iClangMode = global.getIClangMode();
+      if (iClangMode != iclang::IClangMode::ClangMode) {
         auto metaData = global.getMetaData<iclang::MetaData>();
         metaData->midTs = illvm::Time::currentTsMs();
         metaData->frontTimeMs = metaData->midTs - metaData->startTs;
+      }
 
-        if (global.isIClangMode(iclang::IClangMode::ShareCheckMode)) {
-          iclang::ShareCheckCC1Driver::run();
-        } else if (global.isIClangMode(iclang::IClangMode::LineMacroCheckMode)) {
-          iclang::LineMacroCheckCC1Driver::run();
-        } else if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
-          iclang::IncLineCheckCC1Driver::run();
-        } else if (global.isIClangMode(iclang::IClangMode::SourceRangeCheckMode)) {
-          iclang::SourceRangeCheckCC1Driver::run();
-        } else if (global.isIClangMode(iclang::IClangMode::DumpMode)) {
-          iclang::DumpCC1Driver::run();
-        } else if (global.isIClangMode(iclang::IClangMode::ProfileMode)) {
-          iclang::ProfileCC1Driver::run();
-        }
+#define ICLANG_CC1DRIVER_RUN(X)                                                \
+    case iclang::IClangMode::X##Mode:                                          \
+      iclang::X##CC1Driver::run();                                             \
+      break;
+
+      switch (iClangMode) {
+          ICLANG_MODES(ICLANG_CC1DRIVER_RUN)
       }
       // IClang end
 

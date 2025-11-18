@@ -10,35 +10,15 @@ namespace iclang {
 void ASTGlobal::init(const Global &global, clang::Sema *_sema) {
   iClangMode = global.getIClangMode();
   std::unique_ptr<ASTMetaData> ptr;
-  if (iClangMode == IClangMode::IncMode) {
-    astMetaData = illvm::make_owner<IncASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::IncCheckMode) {
-    astMetaData = illvm::make_owner<IncCheckASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::IncLineCheckMode) {
-    astMetaData =
-        illvm::make_owner<IncLineCheckASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::ShareMasterMode) {
-    astMetaData =
-        illvm::make_owner<ShareMasterASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::ShareClientMode) {
-    astMetaData =
-        illvm::make_owner<ShareClientASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::ShareCheckMode) {
-    astMetaData =
-        illvm::make_owner<ShareCheckASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::LineMacroCheckMode) {
-    astMetaData =
-        illvm::make_owner<LineMacroCheckASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::SourceRangeCheckMode) {
-    astMetaData =
-        illvm::make_owner<SourceRangeCheckASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::DumpMode) {
-    astMetaData = illvm::make_owner<DumpASTMetaData>().moveTo<ASTMetaData>();
-  } else if (iClangMode == IClangMode::ProfileMode) {
-    astMetaData = illvm::make_owner<ProfileASTMetaData>().moveTo<ASTMetaData>();
-  } else {
-    astMetaData = illvm::make_owner<ASTMetaData>();
+#define ICLANG_INIT_ASTMD(X)                                                   \
+  case IClangMode::X##Mode:                                                    \
+    astMetaData = illvm::make_owner<X##ASTMetaData>().moveTo<ASTMetaData>();   \
+    break;
+
+  switch (iClangMode) {
+    ICLANG_MODES(ICLANG_INIT_ASTMD)
   }
+
   sema = _sema;
   astNameGenerator =
       std::make_unique<clang::ASTNameGenerator>(sema->getASTContext());

@@ -40,6 +40,12 @@ public:
   static void run();
 };
 
+// PlaceHolder
+class ClangCC1Driver {
+public:
+  static void run() {}
+};
+
 } // namespace iclang
 
 #endif //ICLANG_CHECKCC1DRIVER_H

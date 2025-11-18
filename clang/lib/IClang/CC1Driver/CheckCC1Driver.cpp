@@ -77,4 +77,4 @@ void ProfileCC1Driver::run() {
   // Empty.
 }
 
-}
+} // namespace iclang

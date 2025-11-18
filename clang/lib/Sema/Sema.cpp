@@ -1101,9 +1101,9 @@ void Sema::ActOnEndOfTranslationUnitFragment(TUFragmentKind Kind) {
     const auto &global = iclang::Global::getInstance();
     auto iClangMode = global.getIClangMode();
     if (iClangMode == iclang::IClangMode::IncMode) {
-      iclang::IncCC1Driver::run();
+      iclang::IncCC1Driver::extRun();
     } else if (iClangMode == iclang::IClangMode::IncCheckMode) {
-      iclang::IncCheckCC1Driver::run();
+      iclang::IncCheckCC1Driver::extRun();
     } else {
       PerformPendingInstantiations();
     }

@@ -34,25 +34,12 @@
 #include <string>
 
 #include "iclang/Support/MetaData.h"
+#include "iclang/Support/Mode.h"
 
 #include "illvm/Support/Diagnostics.h"
 #include "illvm/Support/Memory.h"
 
 namespace iclang {
-
-enum class IClangMode {
-  IncMode,
-  IncCheckMode,
-  IncLineCheckMode,
-  ShareMasterMode,
-  ShareClientMode,
-  ShareCheckMode,
-  DumpMode,
-  LineMacroCheckMode,
-  SourceRangeCheckMode,
-  ProfileMode,
-  ClangMode
-};
 
 class ClangModeScope;
 
@@ -89,31 +76,15 @@ public:
 
   static illvm::OPtr<MetaData>
   createMetaData(const IClangMode iClangMode) {
-    illvm::OPtr<MetaData> metaData;
-    if (iClangMode == IClangMode::IncMode) {
-      metaData = illvm::make_owner<IncMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::IncCheckMode) {
-      metaData = illvm::make_owner<IncCheckMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::IncLineCheckMode) {
-      metaData = illvm::make_owner<IncLineCheckMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::ShareMasterMode) {
-      metaData = illvm::make_owner<ShareMasterMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::ShareClientMode) {
-      metaData = illvm::make_owner<ShareClientMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::ShareCheckMode) {
-      metaData = illvm::make_owner<ShareCheckMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::LineMacroCheckMode) {
-      metaData = illvm::make_owner<LineMacroCheckMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::SourceRangeCheckMode) {
-      metaData = illvm::make_owner<SourceRangeCheckMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::DumpMode) {
-      metaData = illvm::make_owner<DumpMetaData>().moveTo<MetaData>();
-    } else if (iClangMode == IClangMode::ProfileMode) {
-      metaData = illvm::make_owner<ProfileMetaData>().moveTo<MetaData>();
-    } else {
-      metaData = illvm::make_owner<MetaData>();
+#define ICLANG_GEN_MD(X)                                                       \
+  case IClangMode::X##Mode:                                                    \
+    return illvm::make_owner<X##MetaData>().moveTo<MetaData>();
+
+    switch (iClangMode) {
+      ICLANG_MODES(ICLANG_GEN_MD)
     }
-    return metaData;
+
+    ILLVM_FCHECK(false, "Unreachable");
   }
 
   template<typename T>
@@ -122,32 +93,7 @@ public:
   }
 
   void init(const std::string &iClangModeStr) {
-    if (iClangModeStr == "Inc") {
-      iClangMode = IClangMode::IncMode;
-    } else if (iClangModeStr == "IncCheck") {
-      iClangMode = IClangMode::IncCheckMode;
-    } else if (iClangModeStr == "IncLineCheck") {
-      iClangMode = IClangMode::IncLineCheckMode;
-    } else if (iClangModeStr == "ShareMaster") {
-      iClangMode = IClangMode::ShareMasterMode;
-    } else if (iClangModeStr == "ShareClient") {
-      iClangMode = IClangMode::ShareClientMode;
-    } else if (iClangModeStr == "ShareTest") {
-      iClangMode = IClangMode::ShareCheckMode;
-    } else if (iClangModeStr == "LineMacroCheck") {
-      iClangMode = IClangMode::LineMacroCheckMode;
-    } else if (iClangModeStr == "SourceRangeCheck") {
-      iClangMode = IClangMode::SourceRangeCheckMode;
-    } else if (iClangModeStr == "Dump") {
-      iClangMode = IClangMode::DumpMode;
-    } else if (iClangModeStr == "Profile") {
-      iClangMode = IClangMode::ProfileMode;
-    } else if (iClangModeStr == "Clang" || iClangModeStr.empty()) {
-      iClangMode = IClangMode::ClangMode;
-    } else {
-      ILLVM_FCHECK(false, "Unknown iClangMode: " + iClangModeStr);
-    }
-
+    iClangMode = iClangModeFromString(iClangModeStr);
     metaData = createMetaData(iClangMode);
   }
 

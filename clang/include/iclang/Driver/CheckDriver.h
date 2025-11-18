@@ -52,6 +52,14 @@ public:
                  const clang::driver::Driver &clangDriver);
 };
 
+// PlaceHolder
+class ClangDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
 } // namespace iclang
 
 #endif //ICLANG_CHECKDRIVER_H

@@ -93,6 +93,8 @@ configPaths(Global &global, const std::string &prevWorkPath,
             const llvm::SmallVector<const char *, 128> &originalArgv) {
   auto metaData = global.getMetaData<MetaData>();
 
+  metaData->iClangMode = iClangModeToString(global.getIClangMode());
+
   metaData->currentPath = illvm::FileSystem::getCurrentPath();
   metaData->originalCommand = illvm::Strings::argVToArgs(originalArgv);
 
