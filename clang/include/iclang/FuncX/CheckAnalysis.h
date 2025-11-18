@@ -67,6 +67,27 @@ public:
   unsigned getFuncWithLineMacroNum() const { return funcsWithLineMacro.size(); }
 };
 
+class SourceRangeCheckAnalysis
+    : public clang::RecursiveASTVisitor<SourceRangeCheckAnalysis> {
+public:
+  using DeclInfo = SourceRangeCheckMetaData::DeclInfo;
+
+private:
+  ASTGlobal &astGlobal;
+  std::vector<DeclInfo> declInfos;
+
+public:
+  explicit SourceRangeCheckAnalysis(ASTGlobal &_astGlobal) : astGlobal(_astGlobal) {}
+
+  bool shouldVisitTemplateInstantiations() const { return false; }
+
+  bool shouldVisitImplicitCode() const { return true; }
+
+  bool TraverseDecl(clang::Decl *decl);
+
+  std::vector<DeclInfo> &&extractDeclInfos() { return std::move(declInfos); }
+};
+
 class DumpAnalysis : public clang::RecursiveASTVisitor<DumpAnalysis> {
 private:
   ASTGlobal &astGlobal;

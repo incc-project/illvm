@@ -42,7 +42,20 @@ void LineMacroCheckCC1Driver::run() {
 }
 
 void SourceRangeCheckCC1Driver::run() {
-  llvm::errs() << "hello source range checker\n";
+  auto &global = Global::getInstance();
+
+  assert(global.getIClangMode() == IClangMode::SourceRangeCheckMode);
+
+  auto &astGlobal = ASTGlobal::getInstance();
+  auto &context = astGlobal.getContext();
+
+  auto metaData = global.getMetaData<SourceRangeCheckMetaData>();
+  const auto astMetaData = astGlobal.getASTMetaData<SourceRangeCheckASTMetaData>();
+
+  funcx::SourceRangeCheckAnalysis sourceRangeCheckAnalysis(astGlobal);
+  sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
+
+  metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
 }
 
 void DumpCC1Driver::run() {

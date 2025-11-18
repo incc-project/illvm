@@ -262,6 +262,21 @@ public:
 
 class SourceRangeCheckMetaData final : public MetaData {
 public:
+  struct DeclInfo {
+    std::string type; // function, class, template
+    std::string name;
+    unsigned startLine, startColumn;
+    unsigned endLine, endColumn;
+  };
+
+  std::vector<DeclInfo> declInfos;
+
+  // Format:
+  // MetaData
+  // declInfos: [{type, name, startLine, startColumn, endLine, endColumn}]
+  llvm::json::Object serialize() const override;
+
+  void deserialize(llvm::json::Object &root) override;
 };
 
 class DumpMetaData final : public MetaData {

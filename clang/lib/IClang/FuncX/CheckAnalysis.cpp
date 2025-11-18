@@ -84,6 +84,49 @@ bool LineMacroCheckAnalysis::TraverseStmt(clang::Stmt *stmt,
   return RecursiveASTVisitor::TraverseStmt(stmt, queue);
 }
 
+bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
+  if (!decl) {
+    return true;
+  }
+
+  if (decl->isImplicit() || !astGlobal.isMainFileDecl(decl)) {
+    return RecursiveASTVisitor::TraverseDecl(decl);
+  }
+
+  DeclInfo declInfo;
+  bool interceptFlag = false;
+
+  if (const auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl)) {
+    declInfo.type = "function";
+    declInfo.name = funcDecl->getNameAsString();
+    interceptFlag = true;
+  }
+
+  if (const auto *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(decl)) {
+    declInfo.type = "class";
+    declInfo.name = classDecl->getNameAsString();
+    interceptFlag = true;
+  }
+
+  if (const auto *templateDecl = llvm::dyn_cast<clang::TemplateDecl>(decl)) {
+    declInfo.type = "template";
+    declInfo.name = templateDecl->getNameAsString();
+    interceptFlag = true;
+  }
+
+  if (interceptFlag) {
+    const auto sourceInterval = astGlobal.getDeclSourceInterval(decl);
+    declInfo.startLine = sourceInterval.startLine;
+    declInfo.startColumn = sourceInterval.startColumn;
+    declInfo.endLine = sourceInterval.endLine;
+    declInfo.endColumn = sourceInterval.endColumn;
+    declInfos.push_back(declInfo);
+    return true;
+  }
+
+  return RecursiveASTVisitor::TraverseDecl(decl);
+}
+
 std::string DumpAnalysis::dumpPrefix(const int n) {
   std::ostringstream oss;
   for (int i = 0; i < n; i++) {

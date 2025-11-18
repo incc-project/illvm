@@ -188,4 +188,48 @@ void LineMacroCheckMetaData::deserialize(llvm::json::Object &root) {
   funcWithLineMacroNum = root["funcWithLineMacroNum"].getAsInteger().value();
 }
 
+llvm::json::Object SourceRangeCheckMetaData::serialize() const {
+  auto root = MetaData::serialize();
+
+  llvm::json::Array arr;
+  for (const auto &declInfo : declInfos) {
+    arr.emplace_back(llvm::json::Object{
+      {"type", declInfo.type},
+      {"name", declInfo.name},
+      {"startLine", declInfo.startLine},
+      {"startColumn", declInfo.startColumn},
+      {"endLine", declInfo.endLine},
+      {"endColumn", declInfo.endColumn},
+    });
+  }
+  root["declInfos"] = llvm::json::Value(std::move(arr));
+
+  return root;
+}
+
+void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
+  MetaData::deserialize(root);
+
+  auto *arr = root["declInfos"].getAsArray();
+  ILLVM_FCHECK(arr != nullptr,
+                    "Failed to parse JSON: Can not convert declInfos to "
+                    "json array");
+
+  declInfos.clear();
+  for (const auto &declInfoV : *arr) {
+    const llvm::json::Object *obj = declInfoV.getAsObject();
+    ILLVM_FCHECK(obj != nullptr,
+                    "Failed to parse JSON: Can not convert declInfo to "
+                    "json object");
+    DeclInfo declInfo;
+    declInfo.type = obj->getString("type").value().str();
+    declInfo.name = obj->getString("name").value().str();
+    declInfo.startLine = obj->getInteger("startLine").value();
+    declInfo.startColumn = obj->getInteger("startColumn").value();
+    declInfo.endLine = obj->getInteger("endLine").value();
+    declInfo.endColumn = obj->getInteger("endColumn").value();
+    declInfos.emplace_back(declInfo);
+  }
+}
+
 } // namespace iclang
