@@ -19,6 +19,7 @@
 //    * In main file.
 //    * Not implicit.
 //    * Is not instantiation, specialization.
+//    * Valid source range.
 //    * Top-level-class, top-level-function, top-level-template.
 //    Record: type(func, class, template), name, source range(line, column).
 // * "Dump": AST dump mode.

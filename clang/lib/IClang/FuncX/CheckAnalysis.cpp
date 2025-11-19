@@ -116,12 +116,14 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
 
   if (interceptFlag) {
     const auto sourceInterval = astGlobal.getDeclSourceInterval(decl);
-    declInfo.startLine = sourceInterval.startLine;
-    declInfo.startColumn = sourceInterval.startColumn;
-    declInfo.endLine = sourceInterval.endLine;
-    declInfo.endColumn = sourceInterval.endColumn;
-    declInfos.push_back(declInfo);
-    return true;
+    if (sourceInterval.isValid) {
+      declInfo.startLine = sourceInterval.startLine;
+      declInfo.startColumn = sourceInterval.startColumn;
+      declInfo.endLine = sourceInterval.endLine;
+      declInfo.endColumn = sourceInterval.endColumn;
+      declInfos.push_back(declInfo);
+      return true;
+    }
   }
 
   return RecursiveASTVisitor::TraverseDecl(decl);
