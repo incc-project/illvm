@@ -126,6 +126,11 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
     }
   }
 
+  if (const auto *varDecl = llvm::dyn_cast<clang::VarDecl>(decl)) {
+    // Ignore in-var-decl.
+    return true;
+  }
+
   return RecursiveASTVisitor::TraverseDecl(decl);
 }
 
