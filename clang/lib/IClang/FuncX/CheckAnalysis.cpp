@@ -126,7 +126,8 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   }
 
   if (const auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
-      funcDecl && funcDecl->doesThisDeclarationHaveABody()) {
+      funcDecl && (funcDecl->doesThisDeclarationHaveABody() ||
+                   funcDecl->isDefaulted() || funcDecl->isDeleted())) {
     declInfo.type = "function";
     declInfo.name = funcDecl->getNameAsString();
 
@@ -180,7 +181,7 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
                 astGlobal.dumpOriginalCode(compoundStmt->getLBracLoc());
             locChar == nullptr || *locChar != '{') {
           declInfo.tags += "(invalid-compound-stmt)";
-            }
+        }
       }
     }
 

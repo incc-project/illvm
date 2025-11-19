@@ -1359,6 +1359,9 @@ Decl *Parser::ParseFunctionDefinition(ParsingDeclarator &D,
   // ActOnStartOfFunctionDef needs to know whether the function is deleted.
   Sema::FnBodyKind BodyKind = Sema::FnBodyKind::Other;
   SourceLocation KWLoc;
+  // IClang begin
+  SourceLocation equalSemiLoc;
+  // IClang end
   if (TryConsumeToken(tok::equal)) {
     assert(getLangOpts().CPlusPlus && "Only C++ function definitions have '='");
 
@@ -1382,11 +1385,16 @@ Decl *Parser::ParseFunctionDefinition(ParsingDeclarator &D,
       Diag(KWLoc, diag::err_default_delete_in_multiple_declaration)
           << (BodyKind == Sema::FnBodyKind::Delete);
       SkipUntil(tok::semi);
-    } else if (ExpectAndConsume(tok::semi, diag::err_expected_after,
-                                BodyKind == Sema::FnBodyKind::Delete
-                                    ? "delete"
-                                    : "default")) {
-      SkipUntil(tok::semi);
+    } else {
+      // IClang begin
+      if (ExpectAndConsume(tok::semi, diag::err_expected_after,
+                           BodyKind == Sema::FnBodyKind::Delete ? "delete"
+                                                                : "default")) {
+        SkipUntil(tok::semi);
+      } else {
+        equalSemiLoc = PrevTokLocation;
+      }
+      // IClang end
     }
   }
 
@@ -1418,6 +1426,16 @@ Decl *Parser::ParseFunctionDefinition(ParsingDeclarator &D,
     Actions.SetFunctionBodyKind(Res, KWLoc, BodyKind);
     Stmt *GeneratedBody = Res ? Res->getBody() : nullptr;
     Actions.ActOnFinishFunctionBody(Res, GeneratedBody, false);
+
+    // IClang begin
+    if (auto *funcDecl = llvm::dyn_cast<FunctionDecl>(Res);
+        funcDecl != nullptr && equalSemiLoc.isValid() &&
+        (BodyKind == Sema::FnBodyKind::Default ||
+         BodyKind == Sema::FnBodyKind::Delete)) {
+      funcDecl->setRangeEnd(equalSemiLoc);
+    }
+    // IClang end
+
     return Res;
   }
 
