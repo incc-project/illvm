@@ -191,7 +191,10 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   if (const auto *templateDecl = llvm::dyn_cast<clang::TemplateDecl>(decl)) {
     declInfo.type = "template";
     declInfo.name = templateDecl->getNameAsString();
-    declInfos.push_back(declInfo);
+
+    if (!inClass) {
+      declInfos.push_back(declInfo);
+    }
     return true;
   }
 
