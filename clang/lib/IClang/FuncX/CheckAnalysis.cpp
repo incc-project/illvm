@@ -93,12 +93,77 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
     return RecursiveASTVisitor::TraverseDecl(decl);
   }
 
+  const auto sourceInterval = astGlobal.getDeclSourceInterval(decl);
+  if (!sourceInterval.isValid) {
+    return RecursiveASTVisitor::TraverseDecl(decl);
+  }
+
+  if (llvm::dyn_cast<clang::VarDecl>(decl) != nullptr) {
+    // Ignore in-var-decl.
+    return true;
+  }
+
   DeclInfo declInfo;
   bool interceptFlag = false;
 
-  if (const auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl)) {
+  declInfo.startLine = sourceInterval.startLine;
+  declInfo.startColumn = sourceInterval.startColumn;
+  declInfo.endLine = sourceInterval.endLine;
+  declInfo.endColumn = sourceInterval.endColumn;
+
+  if (const auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
+      funcDecl && funcDecl->doesThisDeclarationHaveABody()) {
     declInfo.type = "function";
     declInfo.name = funcDecl->getNameAsString();
+
+    declInfo.mangledName = astGlobal.getMangledName(funcDecl);
+
+    if (const auto funcLinkage =
+            funcDecl->getLinkageAndVisibility().getLinkage();
+        funcLinkage != clang::Linkage::ExternalLinkage &&
+        funcLinkage != clang::Linkage::InternalLinkage) {
+      declInfo.tags += "(special-linkage)";
+    }
+    if (funcDecl->isConstexpr()) {
+      declInfo.tags += "(constexpr)";
+    }
+    if (astGlobal.hasAutoReturn(funcDecl)) {
+      declInfo.tags += "(auto)";
+    }
+    if (funcDecl->getOverloadedOperator() !=
+            clang::OverloadedOperatorKind::OO_None ||
+        llvm::dyn_cast<clang::CXXConversionDecl>(funcDecl) != nullptr) {
+      declInfo.tags += "(operator)";
+    }
+    if (const auto *cxxMethodDecl =
+            llvm::dyn_cast<clang::CXXMethodDecl>(funcDecl)) {
+      if (llvm::dyn_cast<clang::CXXConstructorDecl>(cxxMethodDecl) != nullptr) {
+        declInfo.tags += "(constructor)";
+      } else if (llvm::dyn_cast<clang::CXXDestructorDecl>(cxxMethodDecl) !=
+                 nullptr) {
+        declInfo.tags += "(destructor)";
+      }
+      if (cxxMethodDecl->isVirtual()) {
+        declInfo.tags += "(virtual)";
+      }
+    }
+    if (funcDecl->hasAttr<clang::AlwaysInlineAttr>() ||
+        funcDecl->hasAttr<clang::ConstructorAttr>() ||
+        funcDecl->hasAttr<clang::DestructorAttr>()) {
+      declInfo.tags += "(special-attr)";
+    }
+    const auto *compoundStmt =
+        llvm::dyn_cast<clang::CompoundStmt>(funcDecl->getBody());
+    if (compoundStmt == nullptr || compoundStmt->getLBracLoc().isInvalid()) {
+      declInfo.tags += "(invalid-compound-stmt)";
+    } else {
+      if (const char *locChar =
+              astGlobal.dumpOriginalCode(compoundStmt->getLBracLoc());
+          locChar == nullptr || *locChar != '{') {
+        declInfo.tags += "(invalid-compound-stmt)";
+      }
+    }
+
     interceptFlag = true;
   }
 
@@ -115,19 +180,7 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   }
 
   if (interceptFlag) {
-    const auto sourceInterval = astGlobal.getDeclSourceInterval(decl);
-    if (sourceInterval.isValid) {
-      declInfo.startLine = sourceInterval.startLine;
-      declInfo.startColumn = sourceInterval.startColumn;
-      declInfo.endLine = sourceInterval.endLine;
-      declInfo.endColumn = sourceInterval.endColumn;
-      declInfos.push_back(declInfo);
-      return true;
-    }
-  }
-
-  if (const auto *varDecl = llvm::dyn_cast<clang::VarDecl>(decl)) {
-    // Ignore in-var-decl.
+    declInfos.push_back(declInfo);
     return true;
   }
 

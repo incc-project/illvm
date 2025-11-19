@@ -151,7 +151,7 @@ bool ASTGlobal::isValidFuncHeader(const clang::FunctionDecl *funcDecl) const {
     if (!cxxMethodDecl->isOutOfLine()) {
       return false;
     }
-          }
+  }
   if (getMangledName(funcDecl).empty()) {
     return false;
   }

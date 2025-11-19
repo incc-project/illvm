@@ -204,6 +204,8 @@ llvm::json::Object SourceRangeCheckMetaData::serialize() const {
       {"startColumn", declInfo.startColumn},
       {"endLine", declInfo.endLine},
       {"endColumn", declInfo.endColumn},
+      {"mangledName", declInfo.mangledName},
+      {"tags", declInfo.tags},
     });
   }
   root["declInfos"] = llvm::json::Value(std::move(arr));
@@ -232,6 +234,8 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
     declInfo.startColumn = obj->getInteger("startColumn").value();
     declInfo.endLine = obj->getInteger("endLine").value();
     declInfo.endColumn = obj->getInteger("endColumn").value();
+    declInfo.mangledName = obj->getString("mangledName").value().str();
+    declInfo.tags = obj->getString("tags").value().str();
     declInfos.emplace_back(declInfo);
   }
 }

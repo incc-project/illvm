@@ -20,7 +20,7 @@
 //    * Not implicit.
 //    * Is not instantiation, specialization.
 //    * Valid source range.
-//    * Top-level-class, top-level-function, top-level-template.
+//    * Top-level-class, top-level-function definition, top-level-template.
 //    Record: type(func, class, template), name, source range(line, column).
 // * "Dump": AST dump mode.
 // * "Profile": profile Clang.

@@ -270,13 +270,16 @@ public:
     std::string name;
     unsigned startLine, startColumn;
     unsigned endLine, endColumn;
+    std::string mangledName;
+    std::string tags;
   };
 
   std::vector<DeclInfo> declInfos;
 
   // Format:
   // MetaData
-  // declInfos: [{type, name, startLine, startColumn, endLine, endColumn}]
+  // declInfos: [{type, name, startLine, startColumn, endLine, endColumn,
+  // mangledName, tags}]
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
