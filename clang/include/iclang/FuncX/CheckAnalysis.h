@@ -76,6 +76,8 @@ private:
   ASTGlobal &astGlobal;
   std::vector<DeclInfo> declInfos;
 
+  bool inClass = false;
+
 public:
   explicit SourceRangeCheckAnalysis(ASTGlobal &_astGlobal) : astGlobal(_astGlobal) {}
 

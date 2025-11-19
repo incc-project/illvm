@@ -89,6 +89,11 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
     return true;
   }
 
+  if (llvm::dyn_cast<clang::VarDecl>(decl) != nullptr) {
+    // Ignore in-var-decl.
+    return true;
+  }
+
   if (decl->isImplicit() || !astGlobal.isMainFileDecl(decl)) {
     return RecursiveASTVisitor::TraverseDecl(decl);
   }
@@ -98,18 +103,27 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
     return RecursiveASTVisitor::TraverseDecl(decl);
   }
 
-  if (llvm::dyn_cast<clang::VarDecl>(decl) != nullptr) {
-    // Ignore in-var-decl.
-    return true;
-  }
-
   DeclInfo declInfo;
-  bool interceptFlag = false;
 
   declInfo.startLine = sourceInterval.startLine;
   declInfo.startColumn = sourceInterval.startColumn;
   declInfo.endLine = sourceInterval.endLine;
   declInfo.endColumn = sourceInterval.endColumn;
+
+  if (const auto *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(decl)) {
+    declInfo.type = "class";
+    declInfo.name = classDecl->getNameAsString();
+
+    if (!inClass) {
+      declInfos.push_back(declInfo);
+    }
+
+    bool oldInClass = inClass;
+    inClass = true;
+    int res =  RecursiveASTVisitor::TraverseDecl(decl);
+    inClass = oldInClass;
+    return res;
+  }
 
   if (const auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
       funcDecl && funcDecl->doesThisDeclarationHaveABody()) {
@@ -152,34 +166,31 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
         funcDecl->hasAttr<clang::DestructorAttr>()) {
       declInfo.tags += "(special-attr)";
     }
-    const auto *compoundStmt =
-        llvm::dyn_cast<clang::CompoundStmt>(funcDecl->getBody());
-    if (compoundStmt == nullptr || compoundStmt->getLBracLoc().isInvalid()) {
-      declInfo.tags += "(invalid-compound-stmt)";
+    if (funcDecl->isDefaulted()) {
+      declInfo.tags += "(default)";
+    } else if (funcDecl->isDeleted()) {
+      declInfo.tags += "(deleted)";
     } else {
-      if (const char *locChar =
-              astGlobal.dumpOriginalCode(compoundStmt->getLBracLoc());
-          locChar == nullptr || *locChar != '{') {
+      const auto *compoundStmt =
+        llvm::dyn_cast<clang::CompoundStmt>(funcDecl->getBody());
+      if (compoundStmt == nullptr || compoundStmt->getLBracLoc().isInvalid()) {
         declInfo.tags += "(invalid-compound-stmt)";
+      } else {
+        if (const char *locChar =
+                astGlobal.dumpOriginalCode(compoundStmt->getLBracLoc());
+            locChar == nullptr || *locChar != '{') {
+          declInfo.tags += "(invalid-compound-stmt)";
+            }
       }
     }
 
-    interceptFlag = true;
-  }
-
-  if (const auto *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(decl)) {
-    declInfo.type = "class";
-    declInfo.name = classDecl->getNameAsString();
-    interceptFlag = true;
+    declInfos.push_back(declInfo);
+    return true;
   }
 
   if (const auto *templateDecl = llvm::dyn_cast<clang::TemplateDecl>(decl)) {
     declInfo.type = "template";
     declInfo.name = templateDecl->getNameAsString();
-    interceptFlag = true;
-  }
-
-  if (interceptFlag) {
     declInfos.push_back(declInfo);
     return true;
   }
