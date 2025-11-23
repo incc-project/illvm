@@ -126,8 +126,11 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   }
 
   if (const auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
-      funcDecl && (funcDecl->doesThisDeclarationHaveABody() ||
-                   funcDecl->isDefaulted() || funcDecl->isDeleted())) {
+      funcDecl &&
+      (funcDecl->doesThisDeclarationHaveABody() || funcDecl->isDefaulted() ||
+       funcDecl->isDeleted()) &&
+      !funcDecl->isTemplateInstantiation() &&
+      !funcDecl->isFunctionTemplateSpecialization()) {
     declInfo.type = "function";
     declInfo.name = funcDecl->getNameAsString();
 
