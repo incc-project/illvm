@@ -547,7 +547,6 @@ void Parser::ParseLexedMethodDef(LexedMethod &LM) {
       funcDecl != nullptr) {
     auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
     if (astGlobal.isValidFuncHeader(funcDecl)) {
-      llvm::errs() << astGlobal.dumpDecl(funcDecl) << "\n";
       metaData->funcXNum += 1;
       return;
     }

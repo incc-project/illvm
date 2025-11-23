@@ -14958,7 +14958,6 @@ Sema::IClangActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D,
     auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
     auto *funcDecl = dyn_cast<FunctionDecl>(DP);
     if (funcDecl != nullptr && astGlobal.isValidFuncHeader(funcDecl)) {
-      llvm::errs() << astGlobal.dumpDecl(funcDecl) << "\n";
       metaData->funcXNum += 1;
       SkipBody->ShouldSkip = true;
       return nullptr;
