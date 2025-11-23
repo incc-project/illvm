@@ -134,7 +134,8 @@ bool ASTGlobal::hasAutoReturn(const clang::FunctionDecl *FD) {
 }
 
 bool ASTGlobal::isValidFuncHeader(const clang::FunctionDecl *funcDecl) const {
-  if (funcDecl->isImplicit() || !isMainFileDecl(funcDecl)) {
+  if (funcDecl->isImplicit() || !isMainFileDecl(funcDecl) ||
+      funcDecl->getSourceRange().isInvalid()) {
     return false;
   }
   if (const auto funcLinkage = funcDecl->getLinkageAndVisibility().getLinkage();
