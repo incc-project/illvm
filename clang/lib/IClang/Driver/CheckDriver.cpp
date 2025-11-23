@@ -29,8 +29,10 @@ int FuncXCheckDriver::run(
     Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
     const clang::driver::Driver &clangDriver) {
   assert(global.getIClangMode() == IClangMode::FuncXCheckMode);
-  const int res = DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "",
-                                      -1, "", {}, {"-Wno-unused-function"});
+  const int res =
+      DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "", -1, "", {},
+                          {"-Wno-unused-function", "-Wno-unused-const-variable",
+                           "-Wno-unused-private-field"});
   DriverBase::fini(global);
   return res;
 }
