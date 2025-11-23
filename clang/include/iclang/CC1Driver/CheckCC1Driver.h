@@ -30,6 +30,12 @@ public:
   static void run();
 };
 
+class FuncXCheckCC1Driver {
+public:
+  static void run();
+};
+
+
 class DumpCC1Driver {
 public:
   static void run();

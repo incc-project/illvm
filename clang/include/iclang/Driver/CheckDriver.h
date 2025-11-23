@@ -38,6 +38,13 @@ public:
                  const clang::driver::Driver &clangDriver);
 };
 
+class FuncXCheckDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
 class DumpDriver {
 public:
   static int run(Global &global,

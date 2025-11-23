@@ -16,6 +16,11 @@
 #include "clang/Parse/RAIIObjectsForParser.h"
 #include "clang/Sema/DeclSpec.h"
 #include "clang/Sema/Scope.h"
+
+// IClang begin
+#include "iclang/ASTSupport/ASTGlobal.h"
+// IClang end
+
 using namespace clang;
 
 /// ParseCXXInlineMethodDef - We parsed and verified that the specified
@@ -533,6 +538,22 @@ void Parser::ParseLexedMethodDef(LexedMethod &LM) {
   ReenterTemplateScopeRAII InFunctionTemplateScope(*this, LM.D);
 
   ParenBraceBracketBalancer BalancerRAIIObj(*this);
+
+  // IClang begin
+  auto &global = iclang::Global::getInstance();
+  auto &astGlobal = iclang::ASTGlobal::getInstance();
+  auto *funcDecl = dyn_cast<FunctionDecl>(LM.D);
+  if (global.isIClangMode(iclang::IClangMode::FuncXCheckMode) &&
+      funcDecl != nullptr) {
+    auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
+    if (astGlobal.isValidFuncHeader(funcDecl)) {
+      llvm::errs() << astGlobal.dumpDecl(funcDecl) << "\n";
+      metaData->funcXNum += 1;
+      return;
+    }
+  }
+  // return;
+  // IClang end
 
   assert(!LM.Toks.empty() && "Empty body!");
   Token LastBodyToken = LM.Toks.back();

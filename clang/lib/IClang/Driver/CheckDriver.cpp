@@ -25,6 +25,13 @@ int SourceRangeCheckDriver::run(
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
+int FuncXCheckDriver::run(
+    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
+    const clang::driver::Driver &clangDriver) {
+  assert(global.getIClangMode() == IClangMode::FuncXCheckMode);
+  return DriverBase::runBase(global, originalArgv, clangDriver);
+}
+
 int DumpDriver::run(Global &global,
                  const llvm::SmallVector<const char *, 128> &originalArgv,
                  const clang::driver::Driver &clangDriver) {

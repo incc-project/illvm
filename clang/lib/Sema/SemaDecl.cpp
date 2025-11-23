@@ -53,6 +53,10 @@
 #include <optional>
 #include <unordered_map>
 
+// IClang begin
+#include "iclang/ASTSupport/ASTGlobal.h"
+// IClang end
+
 using namespace clang;
 using namespace sema;
 
@@ -14921,6 +14925,56 @@ Sema::ActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D,
 
   return Dcl;
 }
+
+// IClang begin
+
+Decl *
+Sema::IClangActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D,
+                              MultiTemplateParamsArg TemplateParameterLists,
+                              SkipBodyInfo *SkipBody, FnBodyKind BodyKind) {
+  assert(getCurFunctionDecl() == nullptr && "Function parsing confused");
+  assert(D.isFunctionDeclarator() && "Not a function declarator!");
+  Scope *ParentScope = FnBodyScope->getParent();
+
+  // Check if we are in an `omp begin/end declare variant` scope. If we are, and
+  // we define a non-templated function definition, we will create a declaration
+  // instead (=BaseFD), and emit the definition with a mangled name afterwards.
+  // The base function declaration will have the equivalent of an `omp declare
+  // variant` annotation which specifies the mangled definition as a
+  // specialization function under the OpenMP context defined as part of the
+  // `omp begin declare variant`.
+  SmallVector<FunctionDecl *, 4> Bases;
+  if (LangOpts.OpenMP && isInOpenMPDeclareVariantScope())
+    ActOnStartOfFunctionDefinitionInOpenMPDeclareVariantScope(
+        ParentScope, D, TemplateParameterLists, Bases);
+
+  D.setFunctionDefinitionKind(FunctionDefinitionKind::Definition);
+  Decl *DP = HandleDeclarator(ParentScope, D, TemplateParameterLists);
+
+  // IClang begin
+  auto &global = iclang::Global::getInstance();
+  auto &astGlobal = iclang::ASTGlobal::getInstance();
+  if (global.isIClangMode(iclang::IClangMode::FuncXCheckMode) && DP != nullptr) {
+    auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
+    auto *funcDecl = dyn_cast<FunctionDecl>(DP);
+    if (funcDecl != nullptr && astGlobal.isValidFuncHeader(funcDecl)) {
+      llvm::errs() << astGlobal.dumpDecl(funcDecl) << "\n";
+      metaData->funcXNum += 1;
+      SkipBody->ShouldSkip = true;
+      return nullptr;
+    }
+  }
+  // IClang end
+
+  Decl *Dcl = ActOnStartOfFunctionDef(FnBodyScope, DP, SkipBody, BodyKind);
+
+  if (!Bases.empty())
+    ActOnFinishedFunctionDefinitionInOpenMPDeclareVariantScope(Dcl, Bases);
+
+  return Dcl;
+}
+
+// IClang end
 
 void Sema::ActOnFinishInlineFunctionDef(FunctionDecl *D) {
   Consumer.HandleInlineFunctionDefinition(D);

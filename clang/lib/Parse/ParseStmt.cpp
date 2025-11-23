@@ -2440,13 +2440,12 @@ Decl *Parser::ParseFunctionStatementBody(Decl *Decl, ParseScope &BodyScope) {
   SourceLocation LBraceLoc = Tok.getLocation();
 
   // IClang begin.
-  auto funcDecl = llvm::dyn_cast<FunctionDecl>(Decl);
+  auto *funcDecl = llvm::dyn_cast<FunctionDecl>(Decl);
   auto &global = iclang::Global::getInstance();
   auto &astGlobal = iclang::ASTGlobal::getInstance();
   bool isValid = global.isIClangMode(iclang::IClangMode::IncLineCheckMode) &&
                  funcDecl != nullptr && astGlobal.isValidFuncHeader(funcDecl);
   if (isValid) {
-    // llvm::errs() << "Enter Func " << astGlobal.dumpDecl(funcDecl) << "\n";
     auto metadata = global.getMetaData<iclang::IncLineCheckMetaData>();
     metadata->isValidFunctionStack.push_back(true);
   }

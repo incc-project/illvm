@@ -15,6 +15,7 @@
   X(Dump)                                                                      \
   X(LineMacroCheck)                                                            \
   X(SourceRangeCheck)                                                          \
+  X(FuncXCheck)                                                                \
   X(Profile)                                                                   \
   X(Clang)
 

@@ -126,31 +126,40 @@ bool ASTGlobal::hasAutoReturn(const clang::FunctionDecl *FD) {
 }
 
 bool ASTGlobal::isValidFuncHeader(const clang::FunctionDecl *funcDecl) const {
-  if (funcDecl->isImplicit() || !isMainFileDecl(funcDecl) ||
-      funcDecl->getLinkageAndVisibility().getLinkage() ==
-          clang::Linkage::UniqueExternalLinkage ||
-      funcDecl->isTemplated() || funcDecl->isTemplateInstantiation() ||
-      funcDecl->isFunctionTemplateSpecialization() ||
-      llvm::dyn_cast<clang::CXXConstructorDecl>(funcDecl) != nullptr ||
-      llvm::dyn_cast<clang::CXXDestructorDecl>(funcDecl) != nullptr ||
-      funcDecl->getOverloadedOperator() !=
-          clang::OverloadedOperatorKind::OO_None ||
-      llvm::dyn_cast<clang::CXXConversionDecl>(funcDecl) != nullptr ||
-      funcDecl->isConstexpr() ||
-      hasAutoReturn(funcDecl) ||
-      funcDecl->hasAttr<clang::AlwaysInlineAttr>() ||
-      funcDecl->hasAttr<clang::ConstructorAttr>() ||
-      funcDecl->hasAttr<clang::DestructorAttr>()) {
+  if (funcDecl->isImplicit() || !isMainFileDecl(funcDecl)) {
     return false;
-      }
+  }
+  if (const auto funcLinkage = funcDecl->getLinkageAndVisibility().getLinkage();
+      funcLinkage != clang::Linkage::ExternalLinkage &&
+      funcLinkage != clang::Linkage::InternalLinkage) {
+    return false;
+  }
+  if (funcDecl->isTemplated() || funcDecl->isTemplateInstantiation() ||
+      funcDecl->isFunctionTemplateSpecialization()) {
+    return false;
+  }
   if (const clang::CXXMethodDecl *cxxMethodDecl =
           llvm::dyn_cast<const clang::CXXMethodDecl>(funcDecl)) {
     if (cxxMethodDecl->isVirtual()) {
       return false;
     }
-    if (!cxxMethodDecl->isOutOfLine()) {
+    if (llvm::dyn_cast<clang::CXXConstructorDecl>(cxxMethodDecl) != nullptr ||
+        llvm::dyn_cast<clang::CXXDestructorDecl>(cxxMethodDecl) != nullptr) {
       return false;
     }
+  }
+  if (funcDecl->isConstexpr() || hasAutoReturn(funcDecl)) {
+    return false;
+  }
+  if (funcDecl->getOverloadedOperator() !=
+          clang::OverloadedOperatorKind::OO_None ||
+      llvm::dyn_cast<clang::CXXConversionDecl>(funcDecl) != nullptr) {
+    return false;
+  }
+  if (funcDecl->hasAttr<clang::AlwaysInlineAttr>() ||
+      funcDecl->hasAttr<clang::ConstructorAttr>() ||
+      funcDecl->hasAttr<clang::DestructorAttr>()) {
+    return false;
   }
   if (getMangledName(funcDecl).empty()) {
     return false;

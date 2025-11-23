@@ -21,6 +21,11 @@
 #include "clang/Sema/ParsedTemplate.h"
 #include "clang/Sema/Scope.h"
 #include "llvm/Support/Path.h"
+
+// IClang begin
+#include "iclang/ASTSupport/ASTGlobal.h"
+// IClang end
+
 using namespace clang;
 
 
@@ -1401,7 +1406,7 @@ Decl *Parser::ParseFunctionDefinition(ParsingDeclarator &D,
   // Tell the actions module that we have entered a function definition with the
   // specified Declarator for the function.
   Sema::SkipBodyInfo SkipBody;
-  Decl *Res = Actions.ActOnStartOfFunctionDef(getCurScope(), D,
+  Decl *Res = Actions.IClangActOnStartOfFunctionDef(getCurScope(), D,
                                               TemplateInfo.TemplateParams
                                                   ? *TemplateInfo.TemplateParams
                                                   : MultiTemplateParamsArg(),

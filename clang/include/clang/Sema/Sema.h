@@ -3066,6 +3066,10 @@ public:
                                 MultiTemplateParamsArg TemplateParamLists,
                                 SkipBodyInfo *SkipBody = nullptr,
                                 FnBodyKind BodyKind = FnBodyKind::Other);
+  Decl *IClangActOnStartOfFunctionDef(Scope *S, Declarator &D,
+                                MultiTemplateParamsArg TemplateParamLists,
+                                SkipBodyInfo *SkipBody = nullptr,
+                                FnBodyKind BodyKind = FnBodyKind::Other);
   Decl *ActOnStartOfFunctionDef(Scope *S, Decl *D,
                                 SkipBodyInfo *SkipBody = nullptr,
                                 FnBodyKind BodyKind = FnBodyKind::Other);

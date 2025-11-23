@@ -62,6 +62,10 @@ class SourceRangeCheckASTMetaData final : public ASTMetaData {
 public:
 };
 
+class FuncXCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
 class DumpASTMetaData final : public ASTMetaData {
 public:
 };

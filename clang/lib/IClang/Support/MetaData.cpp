@@ -240,4 +240,18 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
   }
 }
 
+llvm::json::Object FuncXCheckMetaData::serialize() const {
+  auto root = MetaData::serialize();
+
+  root["funcXNum"] = funcXNum;
+
+  return root;
+}
+
+void FuncXCheckMetaData::deserialize(llvm::json::Object &root) {
+  MetaData::deserialize(root);
+
+  funcXNum = root["funcXNum"].getAsInteger().value();
+}
+
 } // namespace iclang

@@ -58,6 +58,9 @@ void SourceRangeCheckCC1Driver::run() {
   metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
 }
 
+void FuncXCheckCC1Driver::run() {
+}
+
 void DumpCC1Driver::run() {
   auto &global = Global::getInstance();
 

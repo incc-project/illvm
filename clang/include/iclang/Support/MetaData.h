@@ -285,6 +285,18 @@ public:
   void deserialize(llvm::json::Object &root) override;
 };
 
+class FuncXCheckMetaData final : public MetaData {
+public:
+  int funcXNum = 0;
+
+  // Format:
+  // MetaData
+  // funcXNum
+  llvm::json::Object serialize() const override;
+
+  void deserialize(llvm::json::Object &root) override;
+};
+
 class DumpMetaData final : public MetaData {
 public:
 };
