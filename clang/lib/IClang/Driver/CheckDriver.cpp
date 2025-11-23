@@ -32,7 +32,7 @@ int FuncXCheckDriver::run(
   const int res =
       DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "", -1, "", {},
                           {"-Wno-unused-function", "-Wno-unused-const-variable",
-                           "-Wno-unused-private-field", "-Wno-undefined-internal"});
+                           "-Wno-unused-private-field", "-Wno-undefined-internal", "-Wno-unused-variable"});
   DriverBase::fini(global);
   return res;
 }
