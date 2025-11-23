@@ -206,6 +206,7 @@ llvm::json::Object SourceRangeCheckMetaData::serialize() const {
       {"endColumn", declInfo.endColumn},
       {"mangledName", declInfo.mangledName},
       {"tags", declInfo.tags},
+      {"funcXed", declInfo.funcXed},
     });
   }
   root["declInfos"] = llvm::json::Value(std::move(arr));
@@ -236,22 +237,9 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
     declInfo.endColumn = obj->getInteger("endColumn").value();
     declInfo.mangledName = obj->getString("mangledName").value().str();
     declInfo.tags = obj->getString("tags").value().str();
+    declInfo.funcXed = obj->getBoolean("funcXed").value();
     declInfos.emplace_back(declInfo);
   }
-}
-
-llvm::json::Object FuncXCheckMetaData::serialize() const {
-  auto root = MetaData::serialize();
-
-  root["funcXNum"] = funcXNum;
-
-  return root;
-}
-
-void FuncXCheckMetaData::deserialize(llvm::json::Object &root) {
-  MetaData::deserialize(root);
-
-  funcXNum = root["funcXNum"].getAsInteger().value();
 }
 
 } // namespace iclang

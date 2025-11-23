@@ -14957,8 +14957,12 @@ Sema::IClangActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D,
   if (global.isIClangMode(iclang::IClangMode::FuncXCheckMode) && DP != nullptr) {
     auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
     auto *funcDecl = dyn_cast<FunctionDecl>(DP);
-    if (funcDecl != nullptr && astGlobal.isValidFuncHeader(funcDecl)) {
-      metaData->funcXNum += 1;
+    if (metaData->enableFuncXCheckFlag && funcDecl != nullptr &&
+        astGlobal.isValidFuncHeader(funcDecl)) {
+      auto mangledName = astGlobal.getMangledName(funcDecl);
+      auto it = metaData->visited.find(mangledName);
+      ILLVM_FCHECK(it != metaData->visited.end(), mangledName);
+      metaData->declInfos[it->second].funcXed = true;
       SkipBody->ShouldSkip = true;
       return nullptr;
     }

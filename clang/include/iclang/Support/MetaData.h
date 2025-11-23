@@ -263,15 +263,16 @@ public:
   void deserialize(llvm::json::Object &root) override;
 };
 
-class SourceRangeCheckMetaData final : public MetaData {
+class SourceRangeCheckMetaData : public MetaData {
 public:
   struct DeclInfo {
     std::string type; // function, class, template
     std::string name;
-    unsigned startLine, startColumn;
-    unsigned endLine, endColumn;
+    unsigned startLine = 0, startColumn = 0;
+    unsigned endLine = 0, endColumn = 0;
     std::string mangledName;
     std::string tags;
+    bool funcXed = false;
   };
 
   std::vector<DeclInfo> declInfos;
@@ -279,22 +280,16 @@ public:
   // Format:
   // MetaData
   // declInfos: [{type, name, startLine, startColumn, endLine, endColumn,
-  // mangledName, tags}]
+  // mangledName, tags, funcXed}]
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
 };
 
-class FuncXCheckMetaData final : public MetaData {
+class FuncXCheckMetaData final : public SourceRangeCheckMetaData {
 public:
-  int funcXNum = 0;
-
-  // Format:
-  // MetaData
-  // funcXNum
-  llvm::json::Object serialize() const override;
-
-  void deserialize(llvm::json::Object &root) override;
+  bool enableFuncXCheckFlag = false;
+  std::unordered_map<std::string, int> visited;
 };
 
 class DumpMetaData final : public MetaData {

@@ -8,20 +8,28 @@
 namespace iclang {
 
 void ASTGlobal::init(const Global &global, clang::Sema *_sema) {
-  iClangMode = global.getIClangMode();
-  std::unique_ptr<ASTMetaData> ptr;
+  if (firstInit) {
+    iClangMode = global.getIClangMode();
+    if (astMetaData.get() != nullptr) {
+
+    }
 #define ICLANG_INIT_ASTMD(X)                                                   \
   case IClangMode::X##Mode:                                                    \
     astMetaData = illvm::make_owner<X##ASTMetaData>().moveTo<ASTMetaData>();   \
     break;
 
-  switch (iClangMode) {
-    ICLANG_MODES(ICLANG_INIT_ASTMD)
+    switch (iClangMode) {
+      ICLANG_MODES(ICLANG_INIT_ASTMD)
+    }
+  } else {
+    ILLVM_FCHECK(iClangMode == global.getIClangMode(), "");
   }
 
   sema = _sema;
   astNameGenerator =
       std::make_unique<clang::ASTNameGenerator>(sema->getASTContext());
+
+  firstInit = false;
 }
 
 void ASTGlobal::addDisableWarningDecl(const clang::Decl *decl) {

@@ -546,8 +546,12 @@ void Parser::ParseLexedMethodDef(LexedMethod &LM) {
   if (global.isIClangMode(iclang::IClangMode::FuncXCheckMode) &&
       funcDecl != nullptr) {
     auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
-    if (astGlobal.isValidFuncHeader(funcDecl)) {
-      metaData->funcXNum += 1;
+    if (metaData->enableFuncXCheckFlag &&
+        astGlobal.isValidFuncHeader(funcDecl)) {
+      auto mangledName = astGlobal.getMangledName(funcDecl);
+      auto it = metaData->visited.find(mangledName);
+      ILLVM_FCHECK(it != metaData->visited.end(), mangledName);
+      metaData->declInfos[it->second].funcXed = true;
       return;
     }
   }

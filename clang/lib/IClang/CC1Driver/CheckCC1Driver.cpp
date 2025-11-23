@@ -59,6 +59,24 @@ void SourceRangeCheckCC1Driver::run() {
 }
 
 void FuncXCheckCC1Driver::run() {
+  auto &global = Global::getInstance();
+
+  assert(global.getIClangMode() == IClangMode::FuncXCheckMode);
+
+  auto &astGlobal = ASTGlobal::getInstance();
+  auto &context = astGlobal.getContext();
+
+  auto metaData = global.getMetaData<FuncXCheckMetaData>();
+  const auto astMetaData = astGlobal.getASTMetaData<FuncXCheckASTMetaData>();
+
+  if (metaData->enableFuncXCheckFlag) {
+    return;
+  }
+
+  funcx::SourceRangeCheckAnalysis sourceRangeCheckAnalysis(astGlobal);
+  sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
+
+  metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
 }
 
 void DumpCC1Driver::run() {

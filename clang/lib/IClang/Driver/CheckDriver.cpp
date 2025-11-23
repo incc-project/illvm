@@ -29,7 +29,20 @@ int FuncXCheckDriver::run(
     Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
     const clang::driver::Driver &clangDriver) {
   assert(global.getIClangMode() == IClangMode::FuncXCheckMode);
-  const int res =
+  int res = DriverBase::clangCompile(clangDriver, originalArgv);
+  if (res != 0) {
+    DriverBase::fini(global);
+    return res;
+  }
+  auto metaData = global.getMetaData<FuncXCheckMetaData>();
+  for (size_t i = 0; i < metaData->declInfos.size(); i++) {
+    auto &declInfo = metaData->declInfos[i];
+    if (!declInfo.mangledName.empty()) {
+      metaData->visited[declInfo.mangledName] = i;
+    }
+  }
+  metaData->enableFuncXCheckFlag = true;
+  res =
       DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "", -1, "", {},
       {"-Wno-unused-function", "-Wno-unused-const-variable",
        "-Wno-unused-private-field", "-Wno-undefined-internal",

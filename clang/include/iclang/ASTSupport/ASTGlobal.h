@@ -32,6 +32,8 @@ namespace iclang {
 
 class ASTGlobal {
 private:
+  bool firstInit = true;
+
   IClangMode iClangMode = IClangMode::ClangMode;
 
   clang::Sema *sema = nullptr;
