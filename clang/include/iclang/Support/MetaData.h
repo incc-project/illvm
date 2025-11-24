@@ -277,10 +277,13 @@ public:
 
   std::vector<DeclInfo> declInfos;
 
+  unsigned firstMainDeclLine = 0;
+
   // Format:
   // MetaData
   // declInfos: [{type, name, startLine, startColumn, endLine, endColumn,
   // mangledName, tags, funcXed}]
+  // firstMainDeclLine
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;

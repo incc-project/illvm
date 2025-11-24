@@ -78,6 +78,9 @@ private:
 
   bool inClass = false;
 
+  bool isFirstMainDecl = true;
+  unsigned firstMainDeclLine = 0;
+
 public:
   explicit SourceRangeCheckAnalysis(ASTGlobal &_astGlobal) : astGlobal(_astGlobal) {}
 
@@ -88,6 +91,8 @@ public:
   bool TraverseDecl(clang::Decl *decl);
 
   std::vector<DeclInfo> &&extractDeclInfos() { return std::move(declInfos); }
+
+  unsigned getFirstMainDeclLine() const { return firstMainDeclLine; }
 };
 
 class DumpAnalysis : public clang::RecursiveASTVisitor<DumpAnalysis> {

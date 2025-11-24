@@ -210,6 +210,7 @@ llvm::json::Object SourceRangeCheckMetaData::serialize() const {
     });
   }
   root["declInfos"] = llvm::json::Value(std::move(arr));
+  root["firstMainDeclLine"] = firstMainDeclLine;
 
   return root;
 }
@@ -240,6 +241,7 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
     declInfo.funcXed = obj->getBoolean("funcXed").value();
     declInfos.emplace_back(declInfo);
   }
+  firstMainDeclLine = root["firstMainDeclLine"].getAsInteger().value();
 }
 
 } // namespace iclang

@@ -89,11 +89,6 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
     return true;
   }
 
-  if (llvm::dyn_cast<clang::VarDecl>(decl) != nullptr) {
-    // Ignore in-var-decl.
-    return true;
-  }
-
   if (decl->isImplicit() || !astGlobal.isMainFileDecl(decl)) {
     return RecursiveASTVisitor::TraverseDecl(decl);
   }
@@ -109,6 +104,16 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   declInfo.startColumn = sourceInterval.startColumn;
   declInfo.endLine = sourceInterval.endLine;
   declInfo.endColumn = sourceInterval.endColumn;
+
+  if (isFirstMainDecl) {
+    firstMainDeclLine = sourceInterval.startLine;
+  }
+  isFirstMainDecl = false;
+
+  if (llvm::dyn_cast<clang::VarDecl>(decl) != nullptr) {
+    // Ignore in-var-decl.
+    return true;
+  }
 
   if (const auto *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(decl)) {
     declInfo.type = "class";

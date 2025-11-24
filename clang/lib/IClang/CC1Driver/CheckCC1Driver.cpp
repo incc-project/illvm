@@ -56,6 +56,7 @@ void SourceRangeCheckCC1Driver::run() {
   sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
 
   metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
+  metaData->firstMainDeclLine = sourceRangeCheckAnalysis.getFirstMainDeclLine();
 }
 
 void FuncXCheckCC1Driver::run() {
@@ -77,6 +78,7 @@ void FuncXCheckCC1Driver::run() {
   sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
 
   metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
+  metaData->firstMainDeclLine = sourceRangeCheckAnalysis.getFirstMainDeclLine();
 }
 
 void DumpCC1Driver::run() {
