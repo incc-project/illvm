@@ -211,6 +211,7 @@ llvm::json::Object SourceRangeCheckMetaData::serialize() const {
   }
   root["declInfos"] = llvm::json::Value(std::move(arr));
   root["firstMainDeclLine"] = firstMainDeclLine;
+  root["topIncludeEndLine"] = topIncludeEndLine;
 
   return root;
 }
@@ -242,6 +243,7 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
     declInfos.emplace_back(declInfo);
   }
   firstMainDeclLine = root["firstMainDeclLine"].getAsInteger().value();
+  topIncludeEndLine = root["topIncludeEndLine"].getAsInteger().value();
 }
 
 } // namespace iclang

@@ -45,9 +45,33 @@ namespace iclang {
 class ClangModeScope;
 
 class Global {
+public:
+  enum class LineType {
+    Space,
+    Comment,
+    HashInclude,
+    HashIf,
+    HashIfDef,
+    HashIfNDef,
+    HashElIf,
+    HashElse,
+    HashEndIf,
+    HashDefine,
+    HashUnDef,
+    Other
+  };
+
+  struct LineInfo {
+    LineType type = LineType::Other;
+    int target = -1; // target idx of lineInfos.
+  };
+
 private:
   IClangMode iClangMode = IClangMode::ClangMode;
   illvm::OPtr<MetaData> metaData;
+
+  // idx: line number - 1
+  std::vector<LineInfo> lineInfos;
 
   Global() {}
 
@@ -103,6 +127,12 @@ public:
 
   static illvm::OPtr<MetaData>
   loadMetaDataFromFile(const std::string &filepath, const IClangMode iClangMode);
+
+  const std::vector<LineInfo> &getLineInfos() const { return lineInfos; }
+
+  // Handle space, comment, include, if, ifdef, ifndef, elif, else, endif,
+  // define, undef, do not support pragma, multiple lines.
+  void calLineInfos(const std::vector<std::string> &lines);
 };
 
 class ClangModeScope {
