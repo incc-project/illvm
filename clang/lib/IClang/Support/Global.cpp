@@ -68,6 +68,9 @@ void Global::calLineInfos(const std::vector<std::string> &lines) {
     if (illvm::Strings::hasPrefix(line, "/*")) {
       lineInfos[i].type = LineType::Comment;
       commentBlockFlag = true;
+      if (lineSize >= 2 && line[lineSize-1] == '/' && line[lineSize-2] == '*') {
+        commentBlockFlag = false;
+      }
       continue;
     }
     if (illvm::Strings::hasPrefix(line, "//")) {
