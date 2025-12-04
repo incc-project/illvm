@@ -1,5 +1,7 @@
 #include "iclang/Driver/CheckDriver.h"
 
+#include "iclang/Support/ILexer.h"
+
 #include "illvm/Support/Diagnostics.h"
 #include "illvm/Support/FileSystem.h"
 
@@ -65,7 +67,15 @@ int ILexerCheckDriver::run(
     Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
     const clang::driver::Driver &clangDriver) {
   assert(global.getIClangMode() == IClangMode::ILexerCheckMode);
-  llvm::errs() << "i lexer check mode\n";
+  auto metaData = global.getMetaData<ILexerCheckMetaData>();
+  metaData->iLexerPath = illvm::FileSystem::linkPath(
+      metaData->iClangDirPath[CurDir], "ilexer.cpp");
+  ILexer iLexer;
+  ILLVM_FATAL_ON( iLexer.run(metaData->inputPath), "");
+  std::string cleanedCode = iLexer.getCleanedCode();
+  metaData->hackedMainBuffer = cleanedCode;
+  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
+  illvm::FileSystem::saveStr(metaData->iLexerPath, iLexer.getCleanedCode());
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 

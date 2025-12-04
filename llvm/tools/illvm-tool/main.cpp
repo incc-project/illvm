@@ -254,6 +254,34 @@ public:
   }
 };
 
+class DiffTask : public ExecutingTask {
+private:
+  int runImpl(const std::vector<std::string> &argValues) const override {
+    const std::string srcFile = argValues[0];
+    const std::string destFile = argValues[1];
+    const auto srcContent = illvm::FileSystem::readAll(srcFile);
+    const auto destContent =  illvm::FileSystem::readAll(destFile);
+    if (srcContent != destContent) {
+      std::cerr << "srcFile != destFile" << std::endl;
+      return 1;
+    }
+    std::cout << "srcFile == destFile" << std::endl;
+    return 0;
+  }
+
+  explicit DiffTask(ILLVMToolTask *iLLVMToolTask)
+      : ExecutingTask("diff", "Diff srcFile, destFile", iLLVMToolTask) {
+    argNames.emplace_back("srcFile");
+    argNames.emplace_back("destFile");
+  }
+
+public:
+  __attribute__((constructor)) static DiffTask *getInstance() {
+    static DiffTask instance(ILLVMToolTask::getInstance());
+    return &instance;
+  }
+};
+
 class FuncVTask : public ForwardingTask {
 private:
   explicit FuncVTask(ILLVMToolTask *iLLVMToolTask)

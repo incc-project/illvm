@@ -292,11 +292,11 @@ if 'system-aix' in config.available_features:
 config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"
 
 # IClang begin
-config.substitutions.append(('%illvm-test', os.path.join(config.llvm_obj_root, 'bin', 'illvm-test')))
+config.substitutions.append(('%illvm-tool', os.path.join(config.llvm_obj_root, 'bin', 'illvm-tool')))
 config.substitutions.append((
-    "%iclangtest-linemacrocheck",
+    "%iclang-ilexercheck",
     os.path.join(config.llvm_obj_root, 'bin', 'clang++') +
     " -c -ffunction-sections -fdata-sections -o %S/test.o -c %S/test.cpp " +
-    "-iclang=\"LineMacroCheck\""
+    "-iclang=\"ILexerCheck\""
 ))
 # IClang end

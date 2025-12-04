@@ -114,9 +114,13 @@ bool Preprocessor::EnterSourceFile(FileID FID, ConstSearchDirIterator CurDir,
       }
       InputFile = llvm::MemoryBufferRef(metaData->hackedMainBufferRef,
                                         InputFile->getBufferIdentifier());
-        }
+    }
   } else if (global.isIClangMode(iclang::IClangMode::ILexerCheckMode)) {
-    // TODO.
+    auto metaData = global.getMetaData<iclang::ILexerCheckMetaData>();
+    if (FID == SourceMgr.getMainFileID()) {
+      InputFile = llvm::MemoryBufferRef(metaData->hackedMainBufferRef,
+                                       InputFile->getBufferIdentifier());
+    }
   }
   // IClang end
 
