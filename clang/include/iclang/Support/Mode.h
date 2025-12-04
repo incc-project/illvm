@@ -16,6 +16,7 @@
   X(LineMacroCheck)                                                            \
   X(SourceRangeCheck)                                                          \
   X(FuncXCheck)                                                                \
+  X(ILexerCheck)                                                               \
   X(Profile)                                                                   \
   X(Clang)
 

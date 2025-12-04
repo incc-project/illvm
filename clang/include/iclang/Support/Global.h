@@ -22,6 +22,17 @@
 //    * Valid source range.
 //    * Top-level-class, top-level-function definition, top-level-template.
 //    Record: type(func, class, template), name, source range(line, column).
+// * "ILexerCheck": Run ILexer for the inputFile,
+//    convert UTF-8 to whitespace,
+//    eliminate cross line,
+//    convert comment to whitespace,
+//    match (#if*, #endif) directives,
+//    save to .iclang/ilexer.cpp,
+//    hack input buffer.
+//    Check:
+//    (#if*, #endif) pairwise matching.
+//    size(ilexer.cpp) == size(inputFile).
+//    no compilation error.
 // * "Dump": AST dump mode.
 // * "Profile": profile Clang.
 // * "Clang": default, equivalent to Clang.
@@ -133,6 +144,9 @@ public:
   // Handle space, comment, include, if, ifdef, ifndef, elif, else, endif,
   // define, undef, do not support pragma, multiple lines.
   void calLineInfos(const std::vector<std::string> &lines);
+
+  static std::string hackMainBuffer(const std::string &originalBuffer,
+                                  const std::vector<std::string> &tir);
 };
 
 class ClangModeScope {

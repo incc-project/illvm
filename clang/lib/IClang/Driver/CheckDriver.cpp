@@ -3,6 +3,9 @@
 #include "illvm/Support/Diagnostics.h"
 #include "illvm/Support/FileSystem.h"
 
+#include <fstream>
+#include <stack>
+
 namespace iclang {
 
 int IncLineCheckDriver::run(
@@ -32,29 +35,8 @@ int FuncXCheckDriver::run(
   assert(global.getIClangMode() == IClangMode::FuncXCheckMode);
   auto metaData = global.getMetaData<FuncXCheckMetaData>();
 
-  const auto lines = illvm::FileSystem::readLines(metaData->inputPath);
-  global.calLineInfos(lines);
-  auto &lineInfos = global.getLineInfos();
-  size_t idx = 0;
-  std::vector<size_t> ifStack;
-  for (; idx < lineInfos.size(); ++idx) {
-    if (lineInfos[idx].type == Global::LineType::Other) {
-      break;
-    }
-    if (lineInfos[idx].type == Global::LineType::HashIf ||
-        lineInfos[idx].type == Global::LineType::HashIfDef ||
-        lineInfos[idx].type == Global::LineType::HashIfNDef) {
-      ifStack.push_back(idx);
-    } else if (lineInfos[idx].type == Global::LineType::HashEndIf) {
-      ILLVM_FCHECK(!ifStack.empty(), "Can not match #endif");
-      ifStack.pop_back();
-    }
-  }
-  if (!ifStack.empty()) {
-    idx = ifStack[0];
-  }
   // [1, topIncludeEndLine): idx + 1, [1, topIncludeEndLine]: idx
-  metaData->topIncludeEndLine = idx;
+  metaData->topIncludeEndLine = 0;
 
   int res = DriverBase::clangCompile(clangDriver, originalArgv);
   if (res != 0) {
@@ -77,6 +59,14 @@ int FuncXCheckDriver::run(
        "-Wno-unused-but-set-variable"});
   DriverBase::fini(global);
   return res;
+}
+
+int ILexerCheckDriver::run(
+    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
+    const clang::driver::Driver &clangDriver) {
+  assert(global.getIClangMode() == IClangMode::ILexerCheckMode);
+  llvm::errs() << "i lexer check mode\n";
+  return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
 int DumpDriver::run(Global &global,

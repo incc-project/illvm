@@ -104,7 +104,7 @@ bool Preprocessor::EnterSourceFile(FileID FID, ConstSearchDirIterator CurDir,
     if (metaData->skipTopIncludeRegionFlag &&
         FID == SourceMgr.getMainFileID()) {
       metaData->hackedMainBuffer = InputFile->getBuffer().str();
-      metaData->hackedMainBuffer = metaData->hackMainBuffer(
+      metaData->hackedMainBuffer = global.hackMainBuffer(
           metaData->hackedMainBuffer, metaData->topIncludeRegion);
       metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
       if (global.isIClangMode(iclang::IClangMode::IncCheckMode)) {
@@ -115,6 +115,8 @@ bool Preprocessor::EnterSourceFile(FileID FID, ConstSearchDirIterator CurDir,
       InputFile = llvm::MemoryBufferRef(metaData->hackedMainBufferRef,
                                         InputFile->getBufferIdentifier());
         }
+  } else if (global.isIClangMode(iclang::IClangMode::ILexerCheckMode)) {
+    // TODO.
   }
   // IClang end
 

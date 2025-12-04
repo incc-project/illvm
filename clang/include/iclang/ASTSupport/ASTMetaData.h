@@ -66,6 +66,10 @@ class FuncXCheckASTMetaData final : public ASTMetaData {
 public:
 };
 
+class ILexerCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
 class DumpASTMetaData final : public ASTMetaData {
 public:
 };

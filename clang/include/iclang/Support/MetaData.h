@@ -84,9 +84,6 @@ public:
 
   llvm::StringRef hackedMainBufferRef = "";
 
-  static std::string hackMainBuffer(const std::string &originalBuffer,
-                                  const std::vector<std::string> &tir);
-
   MetaData() = default;
 
   virtual ~MetaData() = default;
@@ -295,6 +292,15 @@ class FuncXCheckMetaData final : public SourceRangeCheckMetaData {
 public:
   bool enableFuncXCheckFlag = false;
   std::unordered_map<std::string, int> visited;
+};
+
+class ILexerCheckMetaData final : public MetaData {
+public:
+  std::string hackedMainBuffer = "";
+
+  llvm::StringRef hackedMainBufferRef = "";
+
+  std::string iLexerPath = "";
 };
 
 class DumpMetaData final : public MetaData {

@@ -35,6 +35,10 @@ public:
   static void run();
 };
 
+class ILexerCheckCC1Driver {
+public:
+  static void run() {}
+};
 
 class DumpCC1Driver {
 public:

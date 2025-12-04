@@ -6,6 +6,8 @@
 
 #include "llvm/Support/JSON.h"
 
+#include <sstream>
+
 namespace iclang {
 
 void Global::saveMetaDataToFile(const std::string &filepath,
@@ -116,6 +118,30 @@ void Global::calLineInfos(const std::vector<std::string> &lines) {
     }
   }
   ILLVM_FCHECK(ifStack.empty(), "Can not match all #endif");
+}
+
+std::string Global::hackMainBuffer(const std::string &originalBuffer,
+                                  const std::vector<std::string> &tir) {
+  std::istringstream iss(originalBuffer);
+  std::string line;
+  std::vector<std::string> lines;
+
+  while (getline(iss, line)) {
+    lines.push_back(line);
+  }
+
+  std::ostringstream oss;
+  for (size_t i = 0; i < tir.size(); i++) {
+    for (size_t j = 0; j < tir[i].size(); j++) {
+      oss << " ";
+    }
+    oss << std::endl;
+  }
+  for (size_t i = tir.size(); i < lines.size(); i++) {
+    oss << lines[i] << std::endl;
+  }
+
+  return oss.str();
 }
 
 } // namespace iclang

@@ -7,30 +7,6 @@
 
 namespace iclang {
 
-std::string MetaData::hackMainBuffer(const std::string &originalBuffer,
-                                  const std::vector<std::string> &tir) {
-  std::istringstream iss(originalBuffer);
-  std::string line;
-  std::vector<std::string> lines;
-
-  while (getline(iss, line)) {
-    lines.push_back(line);
-  }
-
-  std::ostringstream oss;
-  for (size_t i = 0; i < tir.size(); i++) {
-    for (size_t j = 0; j < tir[i].size(); j++) {
-      oss << " ";
-    }
-    oss << std::endl;
-  }
-  for (size_t i = tir.size(); i < lines.size(); i++) {
-    oss << lines[i] << std::endl;
-  }
-
-  return oss.str();
-}
-
 llvm::json::Object MetaData::serialize() const {
   llvm::json::Object root;
 
