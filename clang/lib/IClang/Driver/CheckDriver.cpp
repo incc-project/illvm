@@ -79,6 +79,15 @@ int ILexerCheckDriver::run(
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
+int PCHCheckDriver::run(
+    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
+    const clang::driver::Driver &clangDriver) {
+  assert(global.getIClangMode() == IClangMode::PCHCheckMode);
+  auto metaData = global.getMetaData<PCHCheckMetaData>();
+  llvm::errs() << "Hello pch\n";
+  return DriverBase::runBase(global, originalArgv, clangDriver);
+}
+
 int DumpDriver::run(Global &global,
                  const llvm::SmallVector<const char *, 128> &originalArgv,
                  const clang::driver::Driver &clangDriver) {

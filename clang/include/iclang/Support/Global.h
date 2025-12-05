@@ -35,6 +35,16 @@
 //    (#if*, #endif) pairwise matching.
 //    size(ilexer.cpp) == size(inputFile).
 //    no compilation error.
+// * "PCHCheck":
+//    Normal compilation.
+//    Calculate top include region by ILexer, save to *.iclang/tir.h.
+//    Hack input buffer, delete all code except for the top include region,
+//    make PCH, save to *.iclang/iclang.pch.
+//    Hack input buffer, delete the top include region,
+//    compile inputFile with PCH.
+//    Record normal compilation time, PCH making time, PCH optimization time.
+//    Check:
+//    no pch, compilation error.
 // * "Dump": AST dump mode.
 // * "Profile": profile Clang.
 // * "Clang": default, equivalent to Clang.

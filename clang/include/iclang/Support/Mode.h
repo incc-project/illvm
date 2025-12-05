@@ -17,6 +17,7 @@
   X(SourceRangeCheck)                                                          \
   X(FuncXCheck)                                                                \
   X(ILexerCheck)                                                               \
+  X(PCHCheck)                                                                  \
   X(Profile)                                                                   \
   X(Clang)
 

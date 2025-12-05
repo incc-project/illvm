@@ -303,6 +303,32 @@ public:
   std::string iLexerPath = "";
 };
 
+class PCHCheckMetaData final : public MetaData {
+public:
+  std::string hackedMainBuffer = "";
+
+  llvm::StringRef hackedMainBufferRef = "";
+
+  std::string pchPath = "";
+
+  std::string topIncludeRegionPath = "";
+
+  long long originalTimeMs = 0;
+
+  long long makePCHTimeMs = 0;
+
+  long long pchTimeMs = 0;
+
+  // Format:
+  // MetaData
+  // originalTimeMs
+  // makePCHTimeMs
+  // pchTimeMs
+  llvm::json::Object serialize() const override;
+
+  void deserialize(llvm::json::Object &root) override;
+};
+
 class DumpMetaData final : public MetaData {
 public:
 };

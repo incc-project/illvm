@@ -222,4 +222,22 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
   topIncludeEndLine = root["topIncludeEndLine"].getAsInteger().value();
 }
 
+llvm::json::Object PCHCheckMetaData::serialize() const {
+  auto root = MetaData::serialize();
+
+  root["originalTimeMs"] = originalTimeMs;
+  root["makePCHTimeMs"] = makePCHTimeMs;
+  root["pchTimeMs"] = pchTimeMs;
+
+  return root;
+}
+
+void PCHCheckMetaData::deserialize(llvm::json::Object &root) {
+  MetaData::deserialize(root);
+
+  originalTimeMs = root["originalTimeMs"].getAsInteger().value();
+  makePCHTimeMs = root["makePCHTimeMs"].getAsInteger().value();
+  pchTimeMs = root["pchTimeMs"].getAsInteger().value();
+}
+
 } // namespace iclang

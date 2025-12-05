@@ -40,6 +40,12 @@ public:
   static void run() {}
 };
 
+class PCHCheckCC1Driver {
+public:
+  static void run() {}
+};
+
+
 class DumpCC1Driver {
 public:
   static void run();

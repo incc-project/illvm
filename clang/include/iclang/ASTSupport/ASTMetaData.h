@@ -70,6 +70,10 @@ class ILexerCheckASTMetaData final : public ASTMetaData {
 public:
 };
 
+class PCHCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
 class DumpASTMetaData final : public ASTMetaData {
 public:
 };
