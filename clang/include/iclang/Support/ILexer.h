@@ -3,6 +3,8 @@
 
 #include "illvm/Support/Diagnostics.h"
 
+#include "llvm/Support/MachineValueType.h"
+
 #include <cctype>
 #include <cstdint>
 #include <fstream>
@@ -35,6 +37,11 @@ public:
 
 private:
   std::string cleanedCode = "";
+
+  std::vector<Token> commentTokens;
+  std::vector<Token> ppDirectiveTokens;
+  // if idx -> endif idx, idx: ppDirectiveTokens.
+  std::unordered_map<size_t, size_t> ppIfEndIfMatcher;
 
   static llvm::Expected<int> getUTF8Length(const unsigned char c) {
     if ((c & 0x80) == 0) {
@@ -273,6 +280,98 @@ private:
     }
   }
 
+  static bool startsWith(const std::string &content, const size_t idx,
+                           const std::string &key) {
+    if (idx + key.size() > content.size()) {
+      return false;
+    }
+    return content.compare(idx, key.size(), key) == 0;
+  }
+
+  static void consumeWhiteSpace(const std::string &content, size_t &idx) {
+    while (idx < content.size() && std::isspace(content[idx])) {
+      idx += 1;
+    }
+  }
+
+  static std::string lookaheadIdentifier(const std::string &content,
+                                         const size_t idx) {
+    if (const char first = content[idx];
+        !(std::isalpha(first) || first == '_')) {
+      return "";
+    }
+
+    size_t end = idx + 1;
+    while (end < content.size() &&
+           (std::isalnum(content[end]) || content[end] == '_')) {
+      ++end;
+    }
+
+    return content.substr(idx, end - idx);
+  }
+
+  static TokenKind consumePPDirectiveName(const std::string &content,
+                                             size_t &idx) {
+    assert(content[idx] == '#');
+    idx++;
+
+    consumeWhiteSpace(content, idx);
+
+    const std::string name = lookaheadIdentifier(content, idx);
+    idx += content.size();
+
+    if (name == "if" || name == "ifdef" || name == "ifndef") {
+      return TokenKind::PPIfDirective;
+    }
+    if (name == "endif") {
+      return TokenKind::PPEndIfDirective;
+    }
+    if (name == "elif" || name == "else" || name == "define" ||
+        name == "undef" || name == "include") {
+      return TokenKind::PPOtherValidDirective;
+        }
+    return TokenKind::PPInvalidDirective;
+  }
+
+  static std::vector<Token> lexPPDirective(const std::string &s) {
+    std::vector<Token> tokens;
+
+    std::istringstream iss(s);
+    std::string codeLine;
+    size_t offset = 0;
+    while (std::getline(iss, codeLine, '\n')) {
+      size_t idx = 0;
+      consumeWhiteSpace(codeLine, idx);
+      if (idx < codeLine.size() && codeLine[idx] == '#') {
+        const size_t start = idx;
+        const auto directiveType = consumePPDirectiveName(codeLine, idx);
+        tokens.push_back(
+            Token{directiveType, offset + start, offset + codeLine.size()});
+      }
+      offset += codeLine.size() + 1;
+    }
+
+    return tokens;
+  }
+
+  static llvm::Expected<std::unordered_map<size_t, size_t>>
+  calPPIfEndIfMatcher(const std::vector<Token> &ppDirectiveTokens) {
+    std::unordered_map<size_t, size_t> res;
+    std::vector<size_t> ifEndIfStack;
+    for (size_t i = 0; i < ppDirectiveTokens.size(); ++i) {
+      if (const auto &token = ppDirectiveTokens[i]; token.kind == TokenKind::PPIfDirective) {
+        ifEndIfStack.push_back(i);
+      } else if (token.kind == TokenKind::PPEndIfDirective) {
+        ILLVM_ECHECK(!ifEndIfStack.empty(), "");
+        size_t ifIdx = ifEndIfStack.back();
+        ifEndIfStack.pop_back();
+        res[ifIdx] = i;
+      }
+    }
+    ILLVM_ECHECK(ifEndIfStack.empty(), "");
+    return res;
+  }
+
 public:
   llvm::Error run(const std::string &sourcePath) {
     std::ifstream in(sourcePath, std::ios::binary);
@@ -293,12 +392,40 @@ public:
 
     cleanCommentAndRStr(commentAndStrTokens, cleanedCode);
 
+    commentTokens.clear();
+    for (const auto &token : commentAndStrTokens) {
+      if (token.kind == TokenKind::LineComment ||
+          token.kind == TokenKind::BlockComment) {
+        commentTokens.push_back(token);
+      }
+    }
+
+    ppDirectiveTokens = lexPPDirective(cleanedCode);
+    // for (const auto &token : ppDirectiveTokens) {
+    //   llvm::errs() << static_cast<int>(token.kind) << " " << token.start << " "
+    //                << token.end << "\n";
+    // }
+    if (auto err =
+            calPPIfEndIfMatcher(ppDirectiveTokens).moveInto(ppIfEndIfMatcher)) {
+      return err;
+    }
+
     ILLVM_FCHECK(originalSize == cleanedCode.size(), "");
 
     return llvm::Error::success();
   }
 
   std::string getCleanedCode() const { return cleanedCode; }
+
+  const std::vector<Token> &getCommentTokens() const { return commentTokens; }
+
+  const std::vector<Token> &getPPDirectiveTokens() const {
+    return ppDirectiveTokens;
+  }
+
+  const std::unordered_map<size_t, size_t> &getPPIfEndIfMatcher() const {
+    return ppIfEndIfMatcher;
+  }
 };
 
 } // namespace iclang

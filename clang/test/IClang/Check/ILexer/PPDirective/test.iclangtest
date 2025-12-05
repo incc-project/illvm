@@ -1,0 +1,2 @@
+; RUN: %iclang-ilexercheck
+; RUN: %illvm-tool diff %S/base.cpp %S/test.o.iclang/ilexer.cpp
