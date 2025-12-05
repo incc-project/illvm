@@ -227,7 +227,8 @@ private:
 
     std::size_t i = 0;
     while (i < n) {
-      if (const char c = s[i]; c == '\'') {
+      if (const char c = s[i];
+          c == '\'' && (i == 0 || !std::isdigit(s[i - 1]))) {
         ILLVM_ETRANS(lexCharLiteral(s, i, tokens));
       } else if (c == '"') {
         ILLVM_ETRANS(lexStringLiteral(s, i, tokens));

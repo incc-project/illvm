@@ -16,5 +16,6 @@ const char *s2 = R"(
 char c = '\'';
 char c2 = '"';
 int main() {
+  int n = 100'000;
   return 0;
 }
