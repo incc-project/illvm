@@ -249,19 +249,15 @@ private:
     return tokens;
   }
 
-  static void cleanCommentAndStr(const std::vector<Token> &tokens,
+  static void cleanCommentAndRStr(const std::vector<Token> &tokens,
                                  std::string &s) {
-    for (const auto token : tokens) {
+    for (const auto &token : tokens) {
       size_t start = 0, end = 0;
       switch (token.kind) {
       case TokenKind::LineComment:
       case TokenKind::BlockComment:
         start = token.start;
         end = token.end;
-        break;
-      case TokenKind::StringLiteral:
-        start = token.start + 1;
-        end = token.end - 1;
         break;
       case TokenKind::RawStringLiteral:
         start = token.start + 3;
@@ -294,7 +290,7 @@ public:
       return err;
     }
 
-    cleanCommentAndStr(commentAndStrTokens, cleanedCode);
+    cleanCommentAndRStr(commentAndStrTokens, cleanedCode);
 
     ILLVM_FCHECK(originalSize == cleanedCode.size(), "");
 
