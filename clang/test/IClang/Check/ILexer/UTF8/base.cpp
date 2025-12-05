@@ -1,5 +1,5 @@
-//       ,       UTF-8
+                      
 int main() {
-  const char *s = "            UTF-8         ";
+  const char *s = "                          ";
   return 0;
 }

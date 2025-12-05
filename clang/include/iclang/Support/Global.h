@@ -30,6 +30,8 @@
 //    save to .iclang/ilexer.cpp,
 //    hack input buffer.
 //    Check:
+//    Only support R"()" (no delim).
+//    '', "", /**/ pairwise matching.
 //    (#if*, #endif) pairwise matching.
 //    size(ilexer.cpp) == size(inputFile).
 //    no compilation error.

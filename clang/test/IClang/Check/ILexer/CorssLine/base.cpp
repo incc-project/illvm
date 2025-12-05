@@ -1,9 +1,8 @@
-// test1     test2
+                  
 
-/*
- * sdfdsf                 */
+                               
 
-const char *s = "  asf  sdf";
+const char *s = "          ";
 
 #define X int    x =    1
 
