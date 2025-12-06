@@ -15,22 +15,7 @@
 
 namespace iclang {
 
-class IncLineCheckCC1Driver {
-public:
-  static void run();
-};
-
-class LineMacroCheckCC1Driver {
-public:
-  static void run();
-};
-
 class SourceRangeCheckCC1Driver {
-public:
-  static void run();
-};
-
-class FuncXCheckCC1Driver {
 public:
   static void run();
 };
@@ -45,6 +30,30 @@ public:
   static void run() {}
 };
 
+class IncLineCheckCC1Driver {
+public:
+  static void run();
+};
+
+class LineMacroCheckCC1Driver {
+public:
+  static void run();
+};
+
+class BasicFuncXCheckCC1Driver {
+public:
+  static void run() {}
+};
+
+class DiffCheckCC1Driver {
+public:
+  static void run() {}
+};
+
+class FuncXCheckCC1Driver {
+public:
+  static void run();
+};
 
 class DumpCC1Driver {
 public:
@@ -53,7 +62,7 @@ public:
 
 class ProfileCC1Driver {
 public:
-  static void run();
+  static void run() {}
 };
 
 // PlaceHolder

@@ -10,6 +10,38 @@
 
 namespace iclang {
 
+int SourceRangeCheckDriver::run(
+    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
+    const clang::driver::Driver &clangDriver) {
+  assert(global.getIClangMode() == IClangMode::SourceRangeCheckMode);
+  return DriverBase::runBase(global, originalArgv, clangDriver);
+}
+
+int ILexerCheckDriver::run(
+    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
+    const clang::driver::Driver &clangDriver) {
+  assert(global.getIClangMode() == IClangMode::ILexerCheckMode);
+  auto metaData = global.getMetaData<ILexerCheckMetaData>();
+  metaData->iLexerPath = illvm::FileSystem::linkPath(
+      metaData->iClangDirPath[CurDir], "ilexer.cpp");
+  ILexer iLexer;
+  ILLVM_FATAL_ON( iLexer.run(metaData->inputPath), "");
+  std::string cleanedCode = iLexer.getCleanedCode();
+  metaData->hackedMainBuffer = cleanedCode;
+  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
+  illvm::FileSystem::saveStr(metaData->iLexerPath, iLexer.getCleanedCode());
+  return DriverBase::runBase(global, originalArgv, clangDriver);
+}
+
+int PCHCheckDriver::run(
+    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
+    const clang::driver::Driver &clangDriver) {
+  assert(global.getIClangMode() == IClangMode::PCHCheckMode);
+  auto metaData = global.getMetaData<PCHCheckMetaData>();
+  llvm::errs() << "Hello pch\n";
+  return DriverBase::runBase(global, originalArgv, clangDriver);
+}
+
 int IncLineCheckDriver::run(
     Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
     const clang::driver::Driver &clangDriver) {
@@ -24,11 +56,16 @@ int LineMacroCheckDriver::run(
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
-int SourceRangeCheckDriver::run(
-    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
-    const clang::driver::Driver &clangDriver) {
-  assert(global.getIClangMode() == IClangMode::SourceRangeCheckMode);
-  return DriverBase::runBase(global, originalArgv, clangDriver);
+int BasicFuncXCheckDriver::run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver) {
+  ILLVM_FCHECK(false, "Unreachable");
+}
+
+int DiffCheckDriver::run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver) {
+  ILLVM_FCHECK(false, "Unreachable");
 }
 
 int FuncXCheckDriver::run(
@@ -61,31 +98,6 @@ int FuncXCheckDriver::run(
        "-Wno-unused-but-set-variable"});
   DriverBase::fini(global);
   return res;
-}
-
-int ILexerCheckDriver::run(
-    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
-    const clang::driver::Driver &clangDriver) {
-  assert(global.getIClangMode() == IClangMode::ILexerCheckMode);
-  auto metaData = global.getMetaData<ILexerCheckMetaData>();
-  metaData->iLexerPath = illvm::FileSystem::linkPath(
-      metaData->iClangDirPath[CurDir], "ilexer.cpp");
-  ILexer iLexer;
-  ILLVM_FATAL_ON( iLexer.run(metaData->inputPath), "");
-  std::string cleanedCode = iLexer.getCleanedCode();
-  metaData->hackedMainBuffer = cleanedCode;
-  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
-  illvm::FileSystem::saveStr(metaData->iLexerPath, iLexer.getCleanedCode());
-  return DriverBase::runBase(global, originalArgv, clangDriver);
-}
-
-int PCHCheckDriver::run(
-    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
-    const clang::driver::Driver &clangDriver) {
-  assert(global.getIClangMode() == IClangMode::PCHCheckMode);
-  auto metaData = global.getMetaData<PCHCheckMetaData>();
-  llvm::errs() << "Hello pch\n";
-  return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
 int DumpDriver::run(Global &global,

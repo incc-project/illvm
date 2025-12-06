@@ -23,6 +23,34 @@
 namespace iclang {
 namespace funcx {
 
+class SourceRangeCheckAnalysis
+    : public clang::RecursiveASTVisitor<SourceRangeCheckAnalysis> {
+public:
+  using DeclInfo = SourceRangeCheckMetaData::DeclInfo;
+
+private:
+  ASTGlobal &astGlobal;
+  std::vector<DeclInfo> declInfos;
+
+  bool inClass = false;
+
+  bool isFirstMainDecl = true;
+  unsigned firstMainDeclLine = 0;
+
+public:
+  explicit SourceRangeCheckAnalysis(ASTGlobal &_astGlobal) : astGlobal(_astGlobal) {}
+
+  bool shouldVisitTemplateInstantiations() const { return false; }
+
+  bool shouldVisitImplicitCode() const { return true; }
+
+  bool TraverseDecl(clang::Decl *decl);
+
+  std::vector<DeclInfo> &&extractDeclInfos() { return std::move(declInfos); }
+
+  unsigned getFirstMainDeclLine() const { return firstMainDeclLine; }
+};
+
 class IncLineCheckAnalysis
     : public clang::RecursiveASTVisitor<IncLineCheckAnalysis> {
 private:
@@ -65,34 +93,6 @@ public:
   unsigned getTotalFuncNum() const { return totalFuncNum; }
 
   unsigned getFuncWithLineMacroNum() const { return funcsWithLineMacro.size(); }
-};
-
-class SourceRangeCheckAnalysis
-    : public clang::RecursiveASTVisitor<SourceRangeCheckAnalysis> {
-public:
-  using DeclInfo = SourceRangeCheckMetaData::DeclInfo;
-
-private:
-  ASTGlobal &astGlobal;
-  std::vector<DeclInfo> declInfos;
-
-  bool inClass = false;
-
-  bool isFirstMainDecl = true;
-  unsigned firstMainDeclLine = 0;
-
-public:
-  explicit SourceRangeCheckAnalysis(ASTGlobal &_astGlobal) : astGlobal(_astGlobal) {}
-
-  bool shouldVisitTemplateInstantiations() const { return false; }
-
-  bool shouldVisitImplicitCode() const { return true; }
-
-  bool TraverseDecl(clang::Decl *decl);
-
-  std::vector<DeclInfo> &&extractDeclInfos() { return std::move(declInfos); }
-
-  unsigned getFirstMainDeclLine() const { return firstMainDeclLine; }
 };
 
 class DumpAnalysis : public clang::RecursiveASTVisitor<DumpAnalysis> {

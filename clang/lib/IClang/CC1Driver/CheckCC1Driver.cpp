@@ -5,6 +5,24 @@
 
 namespace iclang {
 
+void SourceRangeCheckCC1Driver::run() {
+  auto &global = Global::getInstance();
+
+  assert(global.getIClangMode() == IClangMode::SourceRangeCheckMode);
+
+  auto &astGlobal = ASTGlobal::getInstance();
+  auto &context = astGlobal.getContext();
+
+  auto metaData = global.getMetaData<SourceRangeCheckMetaData>();
+  const auto astMetaData = astGlobal.getASTMetaData<SourceRangeCheckASTMetaData>();
+
+  funcx::SourceRangeCheckAnalysis sourceRangeCheckAnalysis(astGlobal);
+  sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
+
+  metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
+  metaData->firstMainDeclLine = sourceRangeCheckAnalysis.getFirstMainDeclLine();
+}
+
 void IncLineCheckCC1Driver::run() {
   auto &global = Global::getInstance();
 
@@ -39,24 +57,6 @@ void LineMacroCheckCC1Driver::run() {
   metaData->totalFuncNum = lineMacroCheckAnalysis.getTotalFuncNum();
   metaData->funcWithLineMacroNum =
       lineMacroCheckAnalysis.getFuncWithLineMacroNum();
-}
-
-void SourceRangeCheckCC1Driver::run() {
-  auto &global = Global::getInstance();
-
-  assert(global.getIClangMode() == IClangMode::SourceRangeCheckMode);
-
-  auto &astGlobal = ASTGlobal::getInstance();
-  auto &context = astGlobal.getContext();
-
-  auto metaData = global.getMetaData<SourceRangeCheckMetaData>();
-  const auto astMetaData = astGlobal.getASTMetaData<SourceRangeCheckASTMetaData>();
-
-  funcx::SourceRangeCheckAnalysis sourceRangeCheckAnalysis(astGlobal);
-  sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
-
-  metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
-  metaData->firstMainDeclLine = sourceRangeCheckAnalysis.getFirstMainDeclLine();
 }
 
 void FuncXCheckCC1Driver::run() {
@@ -94,10 +94,6 @@ void DumpCC1Driver::run() {
 
   funcx::DumpAnalysis dumpAnalysis(astGlobal);
   dumpAnalysis.TraverseDecl(context.getTranslationUnitDecl());
-}
-
-void ProfileCC1Driver::run() {
-  // Empty.
 }
 
 } // namespace iclang

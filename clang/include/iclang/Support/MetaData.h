@@ -181,25 +181,6 @@ public:
   std::string funcXTxtPath = "";
 };
 
-class IncLineCheckMetaData : public MetaData {
-public:
-  const char *lineMacro = "__LINE__";
-  const char *iClangLineWrapper = "__ICLW__";
-  bool hashHashFlag = false;
-
-  int baseFuncDefNum = 0;
-
-  std::unordered_set<std::string> inValidMacro;
-  std::vector<bool> isValidFunctionStack;
-
-  // MetaData
-  // hashHashFlag
-  // baseFuncDefNum
-  llvm::json::Object serialize() const override;
-
-  void deserialize(llvm::json::Object &root) override;
-};
-
 class ShareMasterMetaData final : public MetaData {
 public:
 };
@@ -246,20 +227,6 @@ public:
   void deserialize(llvm::json::Object &root) override;
 };
 
-class LineMacroCheckMetaData final : public MetaData {
-public:
-  unsigned totalFuncNum = 0;
-  unsigned funcWithLineMacroNum = 0;
-
-  // Format:
-  // MetaData
-  // totalFuncNum
-  // funcWithLineMacroNum
-  llvm::json::Object serialize() const override;
-
-  void deserialize(llvm::json::Object &root) override;
-};
-
 class SourceRangeCheckMetaData : public MetaData {
 public:
   struct DeclInfo {
@@ -286,12 +253,6 @@ public:
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
-};
-
-class FuncXCheckMetaData final : public SourceRangeCheckMetaData {
-public:
-  bool enableFuncXCheckFlag = false;
-  std::unordered_map<std::string, int> visited;
 };
 
 class ILexerCheckMetaData final : public MetaData {
@@ -327,6 +288,53 @@ public:
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
+};
+
+class IncLineCheckMetaData : public MetaData {
+public:
+  const char *lineMacro = "__LINE__";
+  const char *iClangLineWrapper = "__ICLW__";
+  bool hashHashFlag = false;
+
+  int baseFuncDefNum = 0;
+
+  std::unordered_set<std::string> inValidMacro;
+  std::vector<bool> isValidFunctionStack;
+
+  // MetaData
+  // hashHashFlag
+  // baseFuncDefNum
+  llvm::json::Object serialize() const override;
+
+  void deserialize(llvm::json::Object &root) override;
+};
+
+class LineMacroCheckMetaData final : public MetaData {
+public:
+  unsigned totalFuncNum = 0;
+  unsigned funcWithLineMacroNum = 0;
+
+  // Format:
+  // MetaData
+  // totalFuncNum
+  // funcWithLineMacroNum
+  llvm::json::Object serialize() const override;
+
+  void deserialize(llvm::json::Object &root) override;
+};
+
+class BasicFuncXCheckMetaData final : public MetaData {
+public:
+};
+
+class DiffCheckMetaData final : public MetaData {
+public:
+};
+
+class FuncXCheckMetaData final : public SourceRangeCheckMetaData {
+public:
+  bool enableFuncXCheckFlag = false;
+  std::unordered_map<std::string, int> visited;
 };
 
 class DumpMetaData final : public MetaData {

@@ -10,80 +10,6 @@
 namespace iclang {
 namespace funcx {
 
-bool IncLineCheckAnalysis::TraverseDecl(clang::Decl *decl) {
-  if (!decl) {
-    return true;
-  }
-  auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
-  if (funcDecl == nullptr || !astGlobal.isValidFuncHeader(funcDecl) ||
-      !astGlobal.isValidFuncBody(funcDecl)) {
-    return RecursiveASTVisitor::TraverseDecl(decl);
-  }
-  funcDefNum += 1;
-  // llvm::errs() << astGlobal.dumpDecl(funcDecl) << "\n";
-  const int res = RecursiveASTVisitor::TraverseDecl(decl);
-  return res;
-}
-
-bool LineMacroCheckAnalysis::TraverseDecl(clang::Decl *decl) {
-  if (!decl) {
-    return true;
-  }
-  auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
-  if (funcDecl == nullptr) {
-    return RecursiveASTVisitor::TraverseDecl(decl);
-  }
-  if (!astGlobal.isMainFileDecl(funcDecl)) {
-    return RecursiveASTVisitor::TraverseDecl(decl);
-  }
-  clang::FunctionDecl *oldFuncDecl = curFuncDecl;
-  if (curFuncDecl == nullptr) {
-    curFuncDecl = funcDecl;
-    totalFuncNum += 1;
-  }
-  const int res = RecursiveASTVisitor::TraverseDecl(decl);
-  curFuncDecl = oldFuncDecl;
-  return res;
-}
-
-bool LineMacroCheckAnalysis::TraverseStmt(clang::Stmt *stmt,
-                                         DataRecursionQueue *queue) {
-  if (stmt == nullptr) {
-    return true;
-  }
-  if (curFuncDecl == nullptr) {
-    return RecursiveASTVisitor::TraverseStmt(stmt, queue);
-  }
-  if (const auto *callExpr = llvm::dyn_cast<clang::CallExpr>(stmt)) {
-    const auto *funcDecl = callExpr->getDirectCallee();
-    if (funcDecl != nullptr) {
-      return true;
-    }
-  } else if (const auto *sourceLocExpr =
-                 llvm::dyn_cast<clang::SourceLocExpr>(stmt)) {
-    if (sourceLocExpr->getIdentKind() == clang::SourceLocExpr::IdentKind::Line) {
-      funcsWithLineMacro.insert(curFuncDecl);
-    }
-  } else if (const auto *integerLiteralExpr = llvm::dyn_cast<clang::IntegerLiteral>(stmt)) {
-    auto &sm = astGlobal.getSourceManager();
-    auto &langOpts = astGlobal.getLangOpts();
-    const clang::SourceLocation loc = integerLiteralExpr->getLocation();
-    if (loc.isValid() && loc.isMacroID()) {
-      const std::string macroName =
-        clang::Lexer::getImmediateMacroName(loc, sm, langOpts).str();
-      if (macroName == "__LINE__") {
-        funcsWithLineMacro.insert(curFuncDecl);
-        // llvm::errs() << curFuncDecl->getNameAsString() << "\n";
-        // curFuncDecl->getSourceRange().dump(sm);
-        // loc.dump(sm);
-        // stmt->dump();
-        // llvm::errs() << (void*)stmt << "\n";
-      }
-    }
-  }
-  return RecursiveASTVisitor::TraverseStmt(stmt, queue);
-}
-
 bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   if (!decl) {
     return true;
@@ -208,6 +134,80 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   }
 
   return RecursiveASTVisitor::TraverseDecl(decl);
+}
+
+bool IncLineCheckAnalysis::TraverseDecl(clang::Decl *decl) {
+  if (!decl) {
+    return true;
+  }
+  auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
+  if (funcDecl == nullptr || !astGlobal.isValidFuncHeader(funcDecl) ||
+      !astGlobal.isValidFuncBody(funcDecl)) {
+    return RecursiveASTVisitor::TraverseDecl(decl);
+  }
+  funcDefNum += 1;
+  // llvm::errs() << astGlobal.dumpDecl(funcDecl) << "\n";
+  const int res = RecursiveASTVisitor::TraverseDecl(decl);
+  return res;
+}
+
+bool LineMacroCheckAnalysis::TraverseDecl(clang::Decl *decl) {
+  if (!decl) {
+    return true;
+  }
+  auto *funcDecl = llvm::dyn_cast<clang::FunctionDecl>(decl);
+  if (funcDecl == nullptr) {
+    return RecursiveASTVisitor::TraverseDecl(decl);
+  }
+  if (!astGlobal.isMainFileDecl(funcDecl)) {
+    return RecursiveASTVisitor::TraverseDecl(decl);
+  }
+  clang::FunctionDecl *oldFuncDecl = curFuncDecl;
+  if (curFuncDecl == nullptr) {
+    curFuncDecl = funcDecl;
+    totalFuncNum += 1;
+  }
+  const int res = RecursiveASTVisitor::TraverseDecl(decl);
+  curFuncDecl = oldFuncDecl;
+  return res;
+}
+
+bool LineMacroCheckAnalysis::TraverseStmt(clang::Stmt *stmt,
+                                         DataRecursionQueue *queue) {
+  if (stmt == nullptr) {
+    return true;
+  }
+  if (curFuncDecl == nullptr) {
+    return RecursiveASTVisitor::TraverseStmt(stmt, queue);
+  }
+  if (const auto *callExpr = llvm::dyn_cast<clang::CallExpr>(stmt)) {
+    const auto *funcDecl = callExpr->getDirectCallee();
+    if (funcDecl != nullptr) {
+      return true;
+    }
+  } else if (const auto *sourceLocExpr =
+                 llvm::dyn_cast<clang::SourceLocExpr>(stmt)) {
+    if (sourceLocExpr->getIdentKind() == clang::SourceLocExpr::IdentKind::Line) {
+      funcsWithLineMacro.insert(curFuncDecl);
+    }
+  } else if (const auto *integerLiteralExpr = llvm::dyn_cast<clang::IntegerLiteral>(stmt)) {
+    auto &sm = astGlobal.getSourceManager();
+    auto &langOpts = astGlobal.getLangOpts();
+    const clang::SourceLocation loc = integerLiteralExpr->getLocation();
+    if (loc.isValid() && loc.isMacroID()) {
+      const std::string macroName =
+        clang::Lexer::getImmediateMacroName(loc, sm, langOpts).str();
+      if (macroName == "__LINE__") {
+        funcsWithLineMacro.insert(curFuncDecl);
+        // llvm::errs() << curFuncDecl->getNameAsString() << "\n";
+        // curFuncDecl->getSourceRange().dump(sm);
+        // loc.dump(sm);
+        // stmt->dump();
+        // llvm::errs() << (void*)stmt << "\n";
+      }
+    }
+  }
+  return RecursiveASTVisitor::TraverseStmt(stmt, queue);
 }
 
 std::string DumpAnalysis::dumpPrefix(const int n) {

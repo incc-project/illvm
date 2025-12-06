@@ -32,13 +32,6 @@ class IncCheckASTMetaData final : public ASTMetaData {
 public:
 };
 
-class IncLineCheckASTMetaData final : public ASTMetaData {
-public:
-  static void injectIClangLineWMacro(clang::Sema &sema);
-
-  static void injectIClangLineFunc(clang::Sema &sema);
-};
-
 class ShareMasterASTMetaData final : public ASTMetaData {
 public:
 };
@@ -54,15 +47,7 @@ public:
   void addEmitGlobalFuncDef(const clang::FunctionDecl *funcDecl);
 };
 
-class LineMacroCheckASTMetaData final : public ASTMetaData {
-public:
-};
-
 class SourceRangeCheckASTMetaData final : public ASTMetaData {
-public:
-};
-
-class FuncXCheckASTMetaData final : public ASTMetaData {
 public:
 };
 
@@ -71,6 +56,29 @@ public:
 };
 
 class PCHCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
+class IncLineCheckASTMetaData final : public ASTMetaData {
+public:
+  static void injectIClangLineWMacro(clang::Sema &sema);
+
+  static void injectIClangLineFunc(clang::Sema &sema);
+};
+
+class LineMacroCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
+class BasicFuncXCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
+class DiffCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
+class FuncXCheckASTMetaData final : public ASTMetaData {
 public:
 };
 

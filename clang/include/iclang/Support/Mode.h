@@ -1,3 +1,15 @@
+//===--- Mode.h - IClang mode --------------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===/
+//
+// IClang Mode, see clang/lib/IClang/Support/Mode.cpp
+//
+//===----------------------------------------------------------------------===/
+
 #ifndef ICLANG_MODE_H
 #define ICLANG_MODE_H
 
@@ -8,16 +20,18 @@
 #define ICLANG_MODES(X)                                                        \
   X(Inc)                                                                       \
   X(IncCheck)                                                                  \
-  X(IncLineCheck)                                                              \
   X(ShareMaster)                                                               \
   X(ShareClient)                                                               \
   X(ShareCheck)                                                                \
-  X(Dump)                                                                      \
-  X(LineMacroCheck)                                                            \
   X(SourceRangeCheck)                                                          \
-  X(FuncXCheck)                                                                \
   X(ILexerCheck)                                                               \
   X(PCHCheck)                                                                  \
+  X(IncLineCheck)                                                              \
+  X(LineMacroCheck)                                                            \
+  X(BasicFuncXCheck)                                                           \
+  X(DiffCheck)                                                                 \
+  X(FuncXCheck)                                                                \
+  X(Dump)                                                                      \
   X(Profile)                                                                   \
   X(Clang)
 

@@ -17,28 +17,7 @@
 
 namespace iclang {
 
-class IncLineCheckDriver {
-public:
-  static int run(Global &global,
-                 const llvm::SmallVector<const char *, 128> &originalArgv,
-                 const clang::driver::Driver &clangDriver);
-};
-
-class LineMacroCheckDriver {
-public:
-  static int run(Global &global,
-                 const llvm::SmallVector<const char *, 128> &originalArgv,
-                 const clang::driver::Driver &clangDriver);
-};
-
 class SourceRangeCheckDriver {
-public:
-  static int run(Global &global,
-                 const llvm::SmallVector<const char *, 128> &originalArgv,
-                 const clang::driver::Driver &clangDriver);
-};
-
-class FuncXCheckDriver {
 public:
   static int run(Global &global,
                  const llvm::SmallVector<const char *, 128> &originalArgv,
@@ -53,6 +32,41 @@ public:
 };
 
 class PCHCheckDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
+class IncLineCheckDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
+class LineMacroCheckDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
+class BasicFuncXCheckDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
+class DiffCheckDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
+class FuncXCheckDriver {
 public:
   static int run(Global &global,
                  const llvm::SmallVector<const char *, 128> &originalArgv,

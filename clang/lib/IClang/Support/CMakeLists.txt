@@ -9,6 +9,7 @@ add_clang_library(clangIClangSupport
   Global.cpp
   ILexer.cpp
   MetaData.cpp
+  Mode.cpp
 
   DEPENDS
   ClangDriverOptions
