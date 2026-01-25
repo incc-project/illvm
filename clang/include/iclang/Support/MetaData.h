@@ -273,7 +273,7 @@ public:
 
 class PCHCheckMetaData final : public MetaData {
 public:
-  // 0: normal, 1: make pch, 2: pch
+  // 0: normal, 1: make pch, 2: pch, 3: pch + funcx.
   int flag = 0;
 
   std::string hackedMainBuffer = "";
@@ -292,11 +292,14 @@ public:
 
   long long pchTimeMs = 0;
 
+  long long pchFuncXTimeMs = 0;
+
   // Format:
   // MetaData
   // originalTimeMs
   // makePCHTimeMs
   // pchTimeMs
+  // pchFuncXTimeMs
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;

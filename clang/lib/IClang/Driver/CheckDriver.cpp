@@ -75,6 +75,25 @@ int PCHCheckDriver::run(
                             {}, {"-include-pch", metaData->pchPath.c_str()});
   endTsMs = illvm::Time::currentTsMs();
   metaData->pchTimeMs = endTsMs - startTsMs;
+  if (res != 0) {
+    return res;
+  }
+
+  // PCH + FuncX
+  startTsMs = illvm::Time::currentTsMs();
+  metaData->flag = 3;
+  res = DriverBase::compile(
+      clangDriver, originalArgv, -1, "", -1, "", -1, "", {},
+      {"-include-pch", metaData->pchPath.c_str(), "-Wno-unused-function",
+       "-Wno-unused-const-variable", "-Wno-unused-private-field",
+       "-Wno-undefined-internal", "-Wno-unused-variable",
+       "-Wno-unused-parameter", "-Wno-undefined-inline",
+       "-Wno-unused-but-set-variable"});
+  endTsMs = illvm::Time::currentTsMs();
+  metaData->pchFuncXTimeMs = endTsMs - startTsMs;
+
+  DriverBase::fini(global);
+  return res;
 
   DriverBase::fini(global);
   return res;

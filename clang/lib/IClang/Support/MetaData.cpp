@@ -225,6 +225,7 @@ llvm::json::Object PCHCheckMetaData::serialize() const {
   root["originalTimeMs"] = originalTimeMs;
   root["makePCHTimeMs"] = makePCHTimeMs;
   root["pchTimeMs"] = pchTimeMs;
+  root["pchFuncXTimeMs"] = pchFuncXTimeMs;
 
   return root;
 }
@@ -235,6 +236,7 @@ void PCHCheckMetaData::deserialize(llvm::json::Object &root) {
   originalTimeMs = root["originalTimeMs"].getAsInteger().value();
   makePCHTimeMs = root["makePCHTimeMs"].getAsInteger().value();
   pchTimeMs = root["pchTimeMs"].getAsInteger().value();
+  pchFuncXTimeMs = root["pchFuncXTimeMs"].getAsInteger().value();
 }
 
 llvm::json::Object IncLineCheckMetaData::serialize() const {

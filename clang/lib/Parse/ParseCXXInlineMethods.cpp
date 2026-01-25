@@ -555,7 +555,13 @@ void Parser::ParseLexedMethodDef(LexedMethod &LM) {
       return;
     }
   }
-  // return;
+  if (global.isIClangMode(iclang::IClangMode::PCHCheckMode) &&
+      funcDecl != nullptr) {
+    auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
+    if (metaData->flag == 3 && astGlobal.isValidFuncHeader(funcDecl)) {
+      return;
+    }
+  }
   // IClang end
 
   assert(!LM.Toks.empty() && "Empty body!");

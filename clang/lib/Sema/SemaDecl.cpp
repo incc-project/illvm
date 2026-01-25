@@ -14967,6 +14967,15 @@ Sema::IClangActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D,
       return nullptr;
     }
   }
+  if (global.isIClangMode(iclang::IClangMode::PCHCheckMode) && DP != nullptr) {
+    auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
+    auto *funcDecl = dyn_cast<FunctionDecl>(DP);
+    if (metaData->flag == 3 && funcDecl != nullptr &&
+        astGlobal.isValidFuncHeader(funcDecl)) {
+      SkipBody->ShouldSkip = true;
+      return nullptr;
+    }
+  }
   // IClang end
 
   Decl *Dcl = ActOnStartOfFunctionDef(FnBodyScope, DP, SkipBody, BodyKind);
