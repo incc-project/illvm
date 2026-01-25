@@ -24,13 +24,6 @@ public:
                  const clang::driver::Driver &clangDriver);
 };
 
-class ILexerCheckDriver {
-public:
-  static int run(Global &global,
-                 const llvm::SmallVector<const char *, 128> &originalArgv,
-                 const clang::driver::Driver &clangDriver);
-};
-
 class PCHCheckDriver {
 public:
   static int run(Global &global,

@@ -32,7 +32,8 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   declInfo.endColumn = sourceInterval.endColumn;
 
   if (isFirstMainDecl) {
-    firstMainDeclLine = sourceInterval.startLine;
+    firstMainDeclLoc = {sourceInterval.startOffset,
+                        {sourceInterval.startLine, sourceInterval.startColumn}};
   }
   isFirstMainDecl = false;
 

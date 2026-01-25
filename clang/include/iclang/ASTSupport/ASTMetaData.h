@@ -51,10 +51,6 @@ class SourceRangeCheckASTMetaData final : public ASTMetaData {
 public:
 };
 
-class ILexerCheckASTMetaData final : public ASTMetaData {
-public:
-};
-
 class PCHCheckASTMetaData final : public ASTMetaData {
 public:
 };

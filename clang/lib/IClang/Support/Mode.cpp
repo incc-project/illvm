@@ -28,26 +28,9 @@
 //       * Valid source range.
 //       * Top-level-class, top-level-function/member definition (Note: filter
 //         in-var func), top-level-template.
-// * "ILexerCheck":
-//    Run ILexer for the inputFile,
-//    convert UTF-8 to whitespace,
-//    eliminate cross line,
-//    convert comment to whitespace,
-//    match (#if*, #endif) directives,
-//    save to .iclang/ilexer.cpp,
-//    hack input buffer.
-//    Calculate top include region.
-//    Record the source range of the first Decl.
-//    Check:
-//    Only support R"()" (no delim).
-//    '', "", /**/ pairwise matching.
-//    (#if*, #endif) pairwise matching.
-//    size(ilexer.cpp) == size(inputFile).
-//    top include region <= the source range of the first Decl.
-//    no compilation error.
 // * "PCHCheck":
 //    Normal compilation.
-//    Calculate top include region by ILexer, save to *.iclang/tir.h.
+//    Save top include region (provided by user) to *.iclang/tir.h.
 //    Hack input buffer, delete all code except for the top include region,
 //    make PCH, save to *.iclang/iclang.pch.
 //    Hack input buffer, delete the top include region,
@@ -63,5 +46,3 @@
 // * "Dump": AST dump mode.
 // * "Profile": profile Clang.
 // * "Clang": default, equivalent to Clang.
-
-#include "iclang/Support/ILexer.h"

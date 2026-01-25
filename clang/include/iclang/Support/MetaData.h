@@ -22,6 +22,17 @@
 
 namespace iclang {
 
+class IClangConfig {
+public:
+  std::string iClangMode;
+  // Abs path -> pch line.
+  // [1, pch line] -> pch.
+  // pch line < 1: close pch.
+  std::vector<std::pair<std::string, int>> whiteList;
+
+  static IClangConfig load(const std::string &filepath);
+};
+
 enum IClangDir {
   PrevDir = 0, // .iclang
   CurDir = 1,  // .iclangtmp
@@ -30,6 +41,9 @@ enum IClangDir {
 class MetaData {
 public:
   std::string iClangMode = "";
+
+  // Copy from IClangConfig::whiteList
+  std::vector<std::pair<std::string, int>> whiteList;
 
   bool recoverFlag = false;
 
@@ -241,31 +255,27 @@ public:
 
   std::vector<DeclInfo> declInfos;
 
+  unsigned firstMainDeclOffset = 0;
   unsigned firstMainDeclLine = 0;
-  unsigned topIncludeEndLine = 0;
+  unsigned firstMainDeclColumn = 0;
 
   // Format:
   // MetaData
   // declInfos: [{type, name, startLine, startColumn, endLine, endColumn,
   // mangledName, tags, funcXed}]
+  // firstMainDeclOffset
   // firstMainDeclLine
-  // topIncludeEndLine
+  // firstMainDeclColumn
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
 };
 
-class ILexerCheckMetaData final : public MetaData {
-public:
-  std::string hackedMainBuffer = "";
-
-  llvm::StringRef hackedMainBufferRef = "";
-
-  std::string iLexerPath = "";
-};
-
 class PCHCheckMetaData final : public MetaData {
 public:
+  // 0: normal, 1: make pch, 2: pch
+  int flag = 0;
+
   std::string hackedMainBuffer = "";
 
   llvm::StringRef hackedMainBufferRef = "";
@@ -273,6 +283,8 @@ public:
   std::string pchPath = "";
 
   std::string topIncludeRegionPath = "";
+
+  std::string otherCodePath = "";
 
   long long originalTimeMs = 0;
 

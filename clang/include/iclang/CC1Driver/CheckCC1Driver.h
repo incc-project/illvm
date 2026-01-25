@@ -20,11 +20,6 @@ public:
   static void run();
 };
 
-class ILexerCheckCC1Driver {
-public:
-  static void run() {}
-};
-
 class PCHCheckCC1Driver {
 public:
   static void run() {}

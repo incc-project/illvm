@@ -24,7 +24,6 @@
   X(ShareClient)                                                               \
   X(ShareCheck)                                                                \
   X(SourceRangeCheck)                                                          \
-  X(ILexerCheck)                                                               \
   X(PCHCheck)                                                                  \
   X(IncLineCheck)                                                              \
   X(LineMacroCheck)                                                            \

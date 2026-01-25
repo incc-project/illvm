@@ -1,9 +1,8 @@
 #include "iclang/Driver/CheckDriver.h"
 
-#include "iclang/Support/ILexer.h"
-
 #include "illvm/Support/Diagnostics.h"
 #include "illvm/Support/FileSystem.h"
+#include "illvm/Support/Time.h"
 
 #include <fstream>
 #include <stack>
@@ -17,29 +16,68 @@ int SourceRangeCheckDriver::run(
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
-int ILexerCheckDriver::run(
-    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
-    const clang::driver::Driver &clangDriver) {
-  assert(global.getIClangMode() == IClangMode::ILexerCheckMode);
-  auto metaData = global.getMetaData<ILexerCheckMetaData>();
-  metaData->iLexerPath = illvm::FileSystem::linkPath(
-      metaData->iClangDirPath[CurDir], "ilexer.cpp");
-  ILexer iLexer;
-  ILLVM_FATAL_ON( iLexer.run(metaData->inputPath), "");
-  std::string cleanedCode = iLexer.getCleanedCode();
-  metaData->hackedMainBuffer = cleanedCode;
-  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
-  illvm::FileSystem::saveStr(metaData->iLexerPath, iLexer.getCleanedCode());
-  return DriverBase::runBase(global, originalArgv, clangDriver);
-}
-
 int PCHCheckDriver::run(
     Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
     const clang::driver::Driver &clangDriver) {
   assert(global.getIClangMode() == IClangMode::PCHCheckMode);
   auto metaData = global.getMetaData<PCHCheckMetaData>();
-  llvm::errs() << "Hello pch\n";
-  return DriverBase::runBase(global, originalArgv, clangDriver);
+
+  // Config
+  const auto workPath = metaData->iClangDirPath[CurDir];
+  metaData->pchPath = illvm::FileSystem::linkPath(workPath, "tir.pch");
+  metaData->topIncludeRegionPath = illvm::FileSystem::linkPath(workPath, "tir.h");
+  metaData->otherCodePath = illvm::FileSystem::linkPath(workPath, "other.cpp");
+
+  // Original compilation.
+  auto startTsMs = illvm::Time::currentTsMs();
+  metaData->flag = 0;
+  int res = DriverBase::clangCompile(clangDriver, originalArgv);
+  auto endTsMs = illvm::Time::currentTsMs();
+  metaData->originalTimeMs = endTsMs - startTsMs;
+  if (res != 0) {
+    return res;
+  }
+
+  // Make pch.
+  // Todo: 假设whiteList中只有一个条目, 并且就是当前编译的源文件
+  startTsMs = illvm::Time::currentTsMs();
+  metaData->flag = 1;
+  const int pchLine = metaData->whiteList[0].second;
+  auto lines = illvm::FileSystem::readLines(metaData->inputPath);
+  for (size_t i = pchLine; i < lines.size(); i++) {
+    lines[i] = "";
+  }
+  illvm::FileSystem::saveVector(metaData->topIncludeRegionPath, lines);
+  metaData->hackedMainBuffer = illvm::FileSystem::readAll(metaData->topIncludeRegionPath);
+  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
+  res = DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "",
+                            metaData->emitObjIdx, "-emit-pch",
+                            {{"-dependency-file", 1}, {"-MT", 1}, {"-x", 1}},
+                            {"-x", "c++-header"});
+  illvm::FileSystem::mvFile(metaData->outputPath, metaData->pchPath);
+  endTsMs = illvm::Time::currentTsMs();
+  metaData->makePCHTimeMs = endTsMs - startTsMs;
+  if (res != 0) {
+    return res;
+  }
+
+  // PCH compilation.
+  startTsMs = illvm::Time::currentTsMs();
+  metaData->flag = 2;
+  lines = illvm::FileSystem::readLines(metaData->inputPath);
+  for (int i = 0; i < pchLine; i++) {
+    lines[i] = "";
+  }
+  illvm::FileSystem::saveVector(metaData->otherCodePath, lines);
+  metaData->hackedMainBuffer = illvm::FileSystem::readAll(metaData->otherCodePath);
+  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
+  res = DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "", -1, "",
+                            {}, {"-include-pch", metaData->pchPath.c_str()});
+  endTsMs = illvm::Time::currentTsMs();
+  metaData->pchTimeMs = endTsMs - startTsMs;
+
+  DriverBase::fini(global);
+  return res;
 }
 
 int IncLineCheckDriver::run(
@@ -73,9 +111,6 @@ int FuncXCheckDriver::run(
     const clang::driver::Driver &clangDriver) {
   assert(global.getIClangMode() == IClangMode::FuncXCheckMode);
   auto metaData = global.getMetaData<FuncXCheckMetaData>();
-
-  // [1, topIncludeEndLine): idx + 1, [1, topIncludeEndLine]: idx
-  metaData->topIncludeEndLine = 0;
 
   int res = DriverBase::clangCompile(clangDriver, originalArgv);
   if (res != 0) {

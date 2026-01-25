@@ -119,13 +119,17 @@ bool DriverBase::init(
     const llvm::SmallVector<const char *, 128> &originalArgv) {
   // Load IClang config.
   const auto iClangArg = parseIClangArg(originalArgv);
-  global.init(iClangArg);
+  const IClangConfig iClangConfig = IClangConfig::load(iClangArg);
+
+  global.init(iClangConfig.iClangMode);
 
   if (global.isIClangMode(IClangMode::ClangMode)) {
     return false;
   }
 
   auto metaData = global.getMetaData<MetaData>();
+
+  metaData->whiteList = iClangConfig.whiteList;
 
   // Record Start time stamp.
   metaData->startTs = illvm::Time::currentTsMs();

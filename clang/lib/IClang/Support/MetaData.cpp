@@ -4,8 +4,51 @@
 #include <sstream>
 
 #include "illvm/Support/Diagnostics.h"
+#include "illvm/Support/FileSystem.h"
 
 namespace iclang {
+
+IClangConfig IClangConfig::load(const std::string &filepath) {
+  IClangConfig res;
+
+  const auto jsonData = illvm::FileSystem::readAll(filepath);
+  auto valueOrErr = llvm::json::parse(jsonData);
+  ILLVM_FATAL_ON(valueOrErr.takeError(), "Can not parse IClang config: " + filepath);
+  auto *rootPtr = valueOrErr->getAsObject();
+  ILLVM_FCHECK(rootPtr != nullptr, "Can not load object from IClang config: " + filepath);
+
+  auto root = std::move(*rootPtr);
+
+  const auto iClangModeOpt = root.getString("iClangMode");
+  ILLVM_FCHECK(iClangModeOpt.has_value(),
+               "Can not load iClangMode from IClang config: " + filepath);
+  res.iClangMode = iClangModeOpt->str();
+
+  auto *arr = root.getArray("whiteList");
+  if (arr == nullptr) {
+    return res;
+  }
+
+  for (const auto &elem : *arr) {
+    const auto *obj = elem.getAsObject();
+    ILLVM_FCHECK(
+      obj != nullptr,
+      "Failed to parse JSON: Can not load whiteList elem from IClang config: " +
+          filepath);
+      const auto absPathOpt = obj->getString("absPath");
+      ILLVM_FCHECK(absPathOpt.has_value(),
+                "Can not load absPath from IClang config: " + filepath);
+      const auto absPath = *absPathOpt;
+      const auto pchLineOpt = obj->getInteger("pchLine");
+      int pchLine = 0;
+      if (pchLineOpt.has_value()) {
+        pchLine = *pchLineOpt;
+      }
+      res.whiteList.emplace_back(absPath, pchLine);
+  }
+
+  return res;
+}
 
 llvm::json::Object MetaData::serialize() const {
   llvm::json::Object root;
@@ -138,8 +181,9 @@ llvm::json::Object SourceRangeCheckMetaData::serialize() const {
     });
   }
   root["declInfos"] = llvm::json::Value(std::move(arr));
+  root["firstMainDeclOffset"] = firstMainDeclOffset;
   root["firstMainDeclLine"] = firstMainDeclLine;
-  root["topIncludeEndLine"] = topIncludeEndLine;
+  root["firstMainDeclColumn"] = firstMainDeclColumn;
 
   return root;
 }
@@ -170,8 +214,9 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
     declInfo.funcXed = obj->getBoolean("funcXed").value();
     declInfos.emplace_back(declInfo);
   }
+  firstMainDeclOffset = root["firstMainDeclOffset"].getAsInteger().value();
   firstMainDeclLine = root["firstMainDeclLine"].getAsInteger().value();
-  topIncludeEndLine = root["topIncludeEndLine"].getAsInteger().value();
+  firstMainDeclColumn = root["firstMainDeclColumn"].getAsInteger().value();
 }
 
 llvm::json::Object PCHCheckMetaData::serialize() const {

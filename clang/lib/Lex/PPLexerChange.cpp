@@ -115,11 +115,12 @@ bool Preprocessor::EnterSourceFile(FileID FID, ConstSearchDirIterator CurDir,
       InputFile = llvm::MemoryBufferRef(metaData->hackedMainBufferRef,
                                         InputFile->getBufferIdentifier());
     }
-  } else if (global.isIClangMode(iclang::IClangMode::ILexerCheckMode)) {
-    auto metaData = global.getMetaData<iclang::ILexerCheckMetaData>();
-    if (FID == SourceMgr.getMainFileID()) {
+  } else if (global.isIClangMode(iclang::IClangMode::PCHCheckMode)) {
+    auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
+    if (FID == SourceMgr.getMainFileID() &&
+        (metaData->flag == 1 || metaData->flag == 2)) {
       InputFile = llvm::MemoryBufferRef(metaData->hackedMainBufferRef,
-                                       InputFile->getBufferIdentifier());
+                                        InputFile->getBufferIdentifier());
     }
   }
   // IClang end
