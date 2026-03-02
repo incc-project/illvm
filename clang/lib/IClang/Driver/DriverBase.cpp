@@ -119,6 +119,9 @@ bool DriverBase::init(
     const llvm::SmallVector<const char *, 128> &originalArgv) {
   // Load IClang config.
   const auto iClangArg = parseIClangArg(originalArgv);
+  if (iClangArg.empty()) {
+    return false;
+  }
   const IClangConfig iClangConfig = IClangConfig::load(iClangArg);
 
   global.init(iClangConfig.iClangMode);
