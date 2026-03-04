@@ -146,7 +146,7 @@ bool DriverBase::init(
   }
   metaData->inputPath = illvm::FileSystem::toAbsPath(metaData->inputPath);
   metaData->outputPath = illvm::FileSystem::toAbsPath(metaData->outputPath);
-  metaData->inputDir = "-I"+illvm::FileSystem::parentPath(metaData->inputPath);
+  metaData->inputDir = illvm::FileSystem::parentPath(metaData->inputPath);
   // * WhiteList and BlackList check:
   if (iClangConfig.whiteSet.has_value()) {
     if (iClangConfig.whiteSet->find(metaData->inputPath) ==

@@ -59,7 +59,7 @@ int PCHCheckDriver::run(
                             metaData->pchPath.c_str(), metaData->emitObjIdx,
                             "-emit-pch",
                             {{"-dependency-file", 1}, {"-MT", 1}, {"-x", 1}},
-                            {"-x", "c++-header", metaData->inputDir.c_str()});
+                            {"-x", "c++-header", "-iquote", metaData->inputDir.c_str()});
   endTsMs = illvm::Time::currentTsMs();
   metaData->makePCHTimeMs = endTsMs - startTsMs;
   if (res != 0) {

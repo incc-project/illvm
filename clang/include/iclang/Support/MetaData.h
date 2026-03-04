@@ -77,7 +77,7 @@ public:
   // Input file path.
   std::string inputPath = "";
 
-  // The directory of inputPath ("-I"+inputDir).
+  // The directory of inputPath.
   std::string inputDir = "";
 
   // Output file path.
