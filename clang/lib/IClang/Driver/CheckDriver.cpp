@@ -27,6 +27,7 @@ int PCHCheckDriver::run(
   metaData->pchPath = illvm::FileSystem::linkPath(workPath, "tir.pch");
   metaData->topIncludeRegionPath = illvm::FileSystem::linkPath(workPath, "tir.h");
   metaData->otherCodePath = illvm::FileSystem::linkPath(workPath, "other.cpp");
+  const auto &pchInfoMap = global.getIClangConfig().pchInfoMap;
 
   // Original compilation.
   auto startTsMs = illvm::Time::currentTsMs();
@@ -38,11 +39,20 @@ int PCHCheckDriver::run(
     return res;
   }
 
+  int pchLine = 0;
+  const auto inputAbsPath = illvm::FileSystem::toAbsPath(metaData->inputPath);
+  if (const auto pchLineIt = pchInfoMap.find(inputAbsPath);
+      pchLineIt != pchInfoMap.end()) {
+    pchLine = pchLineIt->second;
+  }
+  if (pchLine == 0) {
+    DriverBase::fini(global);
+    return 0;
+  }
+
   // Make pch.
-  // Todo: 假设whiteList中只有一个条目, 并且就是当前编译的源文件
   startTsMs = illvm::Time::currentTsMs();
   metaData->flag = 1;
-  const int pchLine = metaData->whiteList[0].second;
   auto lines = illvm::FileSystem::readLines(metaData->inputPath);
   for (size_t i = pchLine; i < lines.size(); i++) {
     lines[i] = "";

@@ -13,6 +13,7 @@
 #ifndef ICLANG_METADATA_H
 #define ICLANG_METADATA_H
 
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -22,13 +23,24 @@
 
 namespace iclang {
 
+// whiteList > blackList
+// empty white = filter all
+// no white and no black (or empty black) = *
+// {
+//     "iClangMode": "xxx",
+//     "whiteList"(opt): ["absPath1", "absPath2", ...],
+//     "blackList"(opt): ["absPath1", "absPath2", ...],
+//     "pchInfo"(opt): [
+//         "srcPath": "absPath",
+//         "pchLine": integer,
+//     ]
+// }
 class IClangConfig {
 public:
   std::string iClangMode;
-  // Abs path -> pch line.
-  // [1, pch line] -> pch.
-  // pch line < 1: close pch.
-  std::vector<std::pair<std::string, int>> whiteList;
+  std::optional<std::unordered_set<std::string>> whiteSet;
+  std::optional<std::unordered_set<std::string>> blackSet;
+  std::unordered_map<std::string, int> pchInfoMap;
 
   static IClangConfig load(const std::string &filepath);
 };
@@ -41,9 +53,6 @@ enum IClangDir {
 class MetaData {
 public:
   std::string iClangMode = "";
-
-  // Copy from IClangConfig::whiteList
-  std::vector<std::pair<std::string, int>> whiteList;
 
   bool recoverFlag = false;
 

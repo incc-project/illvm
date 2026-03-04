@@ -24,27 +24,50 @@ IClangConfig IClangConfig::load(const std::string &filepath) {
                "Can not load iClangMode from IClang config: " + filepath);
   res.iClangMode = iClangModeOpt->str();
 
-  auto *arr = root.getArray("whiteList");
-  if (arr == nullptr) {
-    return res;
+  if (auto *arr = root.getArray("whiteList"); arr != nullptr) {
+    res.whiteSet.emplace();
+    for (const auto &elem : *arr) {
+      const auto absPathOpt = elem.getAsString();
+      ILLVM_FCHECK(
+        absPathOpt.has_value(),
+        "Failed to parse JSON: Can not load whiteList elem from IClang config: " +
+            filepath);
+      const auto absPath = absPathOpt->str();
+      res.whiteSet->insert(absPath);
+    }
   }
 
-  for (const auto &elem : *arr) {
-    const auto *obj = elem.getAsObject();
-    ILLVM_FCHECK(
-      obj != nullptr,
-      "Failed to parse JSON: Can not load whiteList elem from IClang config: " +
-          filepath);
-      const auto absPathOpt = obj->getString("absPath");
-      ILLVM_FCHECK(absPathOpt.has_value(),
-                "Can not load absPath from IClang config: " + filepath);
-      const auto absPath = *absPathOpt;
+  if (auto *arr = root.getArray("blackList"); arr != nullptr) {
+    res.blackSet.emplace();
+    for (const auto &elem : *arr) {
+      const auto absPathOpt = elem.getAsString();
+      ILLVM_FCHECK(
+        absPathOpt.has_value(),
+        "Failed to parse JSON: Can not load blackList elem from IClang config: " +
+            filepath);
+      const auto absPath = absPathOpt->str();
+      res.blackSet->insert(absPath);
+    }
+  }
+
+  if (auto *arr = root.getArray("pchInfo"); arr != nullptr) {
+    res.pchInfoMap.emplace();
+    for (const auto &elem : *arr) {
+      const auto *obj = elem.getAsObject();
+      ILLVM_FCHECK(
+        obj != nullptr,
+        "Failed to parse JSON: Can not load pchInfo elem from IClang config: " +
+            filepath);
+      const auto srcPathOpt = obj->getString("srcPath");
+      ILLVM_FCHECK(srcPathOpt.has_value(),
+                "Can not load srcPathOpt from IClang config: " + filepath);
+      const auto srcPath = srcPathOpt->str();
       const auto pchLineOpt = obj->getInteger("pchLine");
-      int pchLine = 0;
-      if (pchLineOpt.has_value()) {
-        pchLine = *pchLineOpt;
-      }
-      res.whiteList.emplace_back(absPath, pchLine);
+      ILLVM_FCHECK(pchLineOpt.has_value(),
+                "Can not load pchLineOpt from IClang config: " + filepath);
+      const int pchLine = *pchLineOpt;
+      res.pchInfoMap[srcPath] = pchLine;
+    }
   }
 
   return res;

@@ -122,17 +122,14 @@ bool DriverBase::init(
   if (iClangArg.empty()) {
     return false;
   }
-  const IClangConfig iClangConfig = IClangConfig::load(iClangArg);
-
-  global.init(iClangConfig.iClangMode);
+  global.init(IClangConfig::load(iClangArg));
+  const IClangConfig &iClangConfig = global.getIClangConfig();
 
   if (global.isIClangMode(IClangMode::ClangMode)) {
     return false;
   }
 
   auto metaData = global.getMetaData<MetaData>();
-
-  metaData->whiteList = iClangConfig.whiteList;
 
   // Record Start time stamp.
   metaData->startTs = illvm::Time::currentTsMs();
@@ -145,6 +142,21 @@ bool DriverBase::init(
                  metaData->outputPath, metaData->inputIdx, metaData->outputIdx,
                  metaData->emitObjIdx)) {
     return false;
+  }
+  // * WhiteList and BlackList check:
+  const auto inputAbsPath = illvm::FileSystem::toAbsPath(metaData->inputPath);
+  if (iClangConfig.whiteSet.has_value()) {
+    if (iClangConfig.whiteSet->find(inputAbsPath) ==
+        iClangConfig.whiteSet->end()) {
+      return false;
+    }
+  } else {
+    if (iClangConfig.blackSet.has_value()) {
+      if (iClangConfig.blackSet->find(inputAbsPath) !=
+          iClangConfig.blackSet->end()) {
+        return false;
+      }
+    }
   }
   // * Important: concurrent compilation, only one can work.
   const std::string prevWorkPath = metaData->outputPath + ".iclang";

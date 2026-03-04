@@ -29,6 +29,7 @@ class ClangModeScope;
 class Global {
 private:
   IClangMode iClangMode = IClangMode::ClangMode;
+  IClangConfig iClangConfig;
   illvm::OPtr<MetaData> metaData;
 
   Global() {}
@@ -43,6 +44,8 @@ public:
     static Global instance;
     return instance;
   }
+
+  const IClangConfig &getIClangConfig() const { return iClangConfig; }
 
   IClangMode getIClangMode() const { return iClangMode; }
 
@@ -75,8 +78,9 @@ public:
     return metaData.borrow().copyTo<T>();
   }
 
-  void init(const std::string &iClangModeStr) {
-    iClangMode = iClangModeFromString(iClangModeStr);
+  void init(IClangConfig &&_iClangConfig) {
+    iClangConfig = std::move(_iClangConfig);
+    iClangMode = iClangModeFromString(iClangConfig.iClangMode);
     metaData = createMetaData(iClangMode);
   }
 
