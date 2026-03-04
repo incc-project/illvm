@@ -95,7 +95,8 @@ configPaths(Global &global, const std::string &prevWorkPath,
 
   metaData->iClangMode = iClangModeToString(global.getIClangMode());
 
-  metaData->currentPath = illvm::FileSystem::getCurrentPath();
+  metaData->currentPath =
+      illvm::FileSystem::toAbsPath(illvm::FileSystem::getCurrentPath());
   metaData->originalCommand = illvm::Strings::argVToArgs(originalArgv);
 
   metaData->iClangDirPath[IClangDir::PrevDir] = prevWorkPath;
@@ -143,16 +144,18 @@ bool DriverBase::init(
                  metaData->emitObjIdx)) {
     return false;
   }
+  metaData->inputPath = illvm::FileSystem::toAbsPath(metaData->inputPath);
+  metaData->outputPath = illvm::FileSystem::toAbsPath(metaData->outputPath);
+  metaData->inputDir = "-I"+illvm::FileSystem::parentPath(metaData->inputPath);
   // * WhiteList and BlackList check:
-  const auto inputAbsPath = illvm::FileSystem::toAbsPath(metaData->inputPath);
   if (iClangConfig.whiteSet.has_value()) {
-    if (iClangConfig.whiteSet->find(inputAbsPath) ==
+    if (iClangConfig.whiteSet->find(metaData->inputPath) ==
         iClangConfig.whiteSet->end()) {
       return false;
     }
   } else {
     if (iClangConfig.blackSet.has_value()) {
-      if (iClangConfig.blackSet->find(inputAbsPath) !=
+      if (iClangConfig.blackSet->find(metaData->inputPath) !=
           iClangConfig.blackSet->end()) {
         return false;
       }

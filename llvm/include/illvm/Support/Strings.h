@@ -14,6 +14,7 @@
 #define ILLVM_STRINGS_H
 
 #include <string>
+#include <vector>
 
 #include "llvm/ADT/SmallVector.h"
 
@@ -27,6 +28,8 @@ public:
 
   static std::string
   argVToArgs(const llvm::SmallVector<const char *, 128> &argv);
+
+  static std::string vecToStr(const std::vector<std::string> &vec);
 };
 
 } // namespace illvm

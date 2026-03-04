@@ -2,6 +2,7 @@
 
 #include "illvm/Support/Diagnostics.h"
 #include "illvm/Support/FileSystem.h"
+#include "illvm/Support/Strings.h"
 #include "illvm/Support/Time.h"
 
 #include <fstream>
@@ -24,9 +25,8 @@ int PCHCheckDriver::run(
 
   // Config
   const auto workPath = metaData->iClangDirPath[CurDir];
-  metaData->pchPath = illvm::FileSystem::linkPath(workPath, "tir.pch");
-  metaData->topIncludeRegionPath = illvm::FileSystem::linkPath(workPath, "tir.h");
-  metaData->otherCodePath = illvm::FileSystem::linkPath(workPath, "other.cpp");
+  metaData->pchPath = illvm::FileSystem::linkPath(workPath, "header.pch");
+  metaData->headerPath = illvm::FileSystem::linkPath(workPath, "header.h");
   const auto &pchInfoMap = global.getIClangConfig().pchInfoMap;
 
   // Original compilation.
@@ -40,12 +40,11 @@ int PCHCheckDriver::run(
   }
 
   int pchLine = 0;
-  const auto inputAbsPath = illvm::FileSystem::toAbsPath(metaData->inputPath);
-  if (const auto pchLineIt = pchInfoMap.find(inputAbsPath);
+  if (const auto pchLineIt = pchInfoMap.find(metaData->inputPath);
       pchLineIt != pchInfoMap.end()) {
     pchLine = pchLineIt->second;
   }
-  if (pchLine == 0) {
+  if (pchLine <= 0) {
     DriverBase::fini(global);
     return 0;
   }
@@ -53,18 +52,14 @@ int PCHCheckDriver::run(
   // Make pch.
   startTsMs = illvm::Time::currentTsMs();
   metaData->flag = 1;
-  auto lines = illvm::FileSystem::readLines(metaData->inputPath);
-  for (size_t i = pchLine; i < lines.size(); i++) {
-    lines[i] = "";
-  }
-  illvm::FileSystem::saveVector(metaData->topIncludeRegionPath, lines);
-  metaData->hackedMainBuffer = illvm::FileSystem::readAll(metaData->topIncludeRegionPath);
-  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
-  res = DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "",
-                            metaData->emitObjIdx, "-emit-pch",
+  auto lines = illvm::FileSystem::readFirstNLines(metaData->inputPath, pchLine);
+  illvm::FileSystem::saveVector(metaData->headerPath, lines);
+  res = DriverBase::compile(clangDriver, originalArgv, metaData->inputIdx,
+                            metaData->headerPath.c_str(), metaData->outputIdx,
+                            metaData->pchPath.c_str(), metaData->emitObjIdx,
+                            "-emit-pch",
                             {{"-dependency-file", 1}, {"-MT", 1}, {"-x", 1}},
-                            {"-x", "c++-header"});
-  illvm::FileSystem::mvFile(metaData->outputPath, metaData->pchPath);
+                            {"-x", "c++-header", metaData->inputDir.c_str()});
   endTsMs = illvm::Time::currentTsMs();
   metaData->makePCHTimeMs = endTsMs - startTsMs;
   if (res != 0) {
@@ -78,8 +73,7 @@ int PCHCheckDriver::run(
   for (int i = 0; i < pchLine; i++) {
     lines[i] = "";
   }
-  illvm::FileSystem::saveVector(metaData->otherCodePath, lines);
-  metaData->hackedMainBuffer = illvm::FileSystem::readAll(metaData->otherCodePath);
+  metaData->hackedMainBuffer = illvm::Strings::vecToStr(lines);
   metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
   res = DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "", -1, "",
                             {}, {"-include-pch", metaData->pchPath.c_str()});

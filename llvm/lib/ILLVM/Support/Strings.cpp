@@ -1,6 +1,7 @@
 #include "illvm/Support/Strings.h"
 
 #include <algorithm>
+#include <sstream>
 
 namespace illvm {
 
@@ -39,6 +40,14 @@ Strings::argVToArgs(const llvm::SmallVector<const char *, 128> &argv) {
     args.append(argv[i]);
   }
   return args;
+}
+
+std::string Strings::vecToStr(const std::vector<std::string> &vec) {
+    std::ostringstream oss;
+    for (const auto &elem : vec) {
+      oss << elem << std::endl;
+    }
+    return oss.str();
 }
 
 } // namespace illvm

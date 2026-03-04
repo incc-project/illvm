@@ -50,6 +50,7 @@ enum IClangDir {
   CurDir = 1,  // .iclangtmp
 };
 
+// All paths are absolute paths.
 class MetaData {
 public:
   std::string iClangMode = "";
@@ -75,6 +76,9 @@ public:
 
   // Input file path.
   std::string inputPath = "";
+
+  // The directory of inputPath ("-I"+inputDir).
+  std::string inputDir = "";
 
   // Output file path.
   std::string outputPath = "";
@@ -289,11 +293,9 @@ public:
 
   llvm::StringRef hackedMainBufferRef = "";
 
+  std::string headerPath = "";
+
   std::string pchPath = "";
-
-  std::string topIncludeRegionPath = "";
-
-  std::string otherCodePath = "";
 
   long long originalTimeMs = 0;
 
