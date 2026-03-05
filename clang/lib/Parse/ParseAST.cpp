@@ -126,37 +126,6 @@ void clang::ParseAST(Sema &S, bool PrintStats, bool SkipFunctionBodies) {
   if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
     iclang::IncLineCheckASTMetaData::injectIClangLineWMacro(S);
     iclang::IncLineCheckASTMetaData::injectIClangLineFunc(S);
-  } else if (global.isIClangMode(iclang::IClangMode::PCHCheckMode)) {
-    auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
-    if (metaData->flag == 2 && metaData->pchLine > 0) {
-      auto &sm = astGlobal.getSourceManagerM();
-      StringRef buffer = sm.getBufferData(sm.getMainFileID());
-
-      std::string newContent;
-      unsigned line = 0;
-
-      for (size_t i = 0; i < buffer.size(); ++i) {
-        if (line < metaData->pchLine) {
-          if (buffer[i] == '\n') {
-            line++;
-            newContent += '\n';
-          } else {
-            newContent += ' ';
-          }
-        } else {
-          newContent += buffer[i];
-        }
-      }
-
-      illvm::FileSystem::saveStr(metaData->srcCheckPath, newContent);
-
-      auto newBuffer =
-          llvm::MemoryBuffer::getMemBufferCopy(newContent);
-
-      FileID newID = sm.createFileID(std::move(newBuffer));
-
-      sm.setMainFileID(newID);
-    }
   }
   // IClang end
 

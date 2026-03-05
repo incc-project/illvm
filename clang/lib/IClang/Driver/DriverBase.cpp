@@ -121,6 +121,9 @@ bool DriverBase::init(
   // Load IClang config.
   const auto iClangArg = parseIClangArg(originalArgv);
   if (iClangArg.empty()) {
+    IClangConfig iClangConfig;
+    iClangConfig.iClangMode = "Clang";
+    global.init(std::move(iClangConfig));
     return false;
   }
   global.init(IClangConfig::load(iClangArg));

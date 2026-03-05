@@ -7,6 +7,9 @@ set(LLVM_LINK_COMPONENTS
   ProfileData
   Support
   TargetParser
+  # IClang begin
+  ILLVMSupport
+  # IClang end
   )
 
 add_clang_library(clangFrontend
@@ -56,4 +59,7 @@ add_clang_library(clangFrontend
   clangParse
   clangSema
   clangSerialization
+  # IClang begin
+  clangIClangSupport
+  # IClang end
   )
