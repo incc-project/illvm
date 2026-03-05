@@ -48,6 +48,7 @@ int PCHCheckDriver::run(
     DriverBase::fini(global);
     return 0;
   }
+  metaData->pchLine = pchLine;
 
   // Make pch.
   startTsMs = illvm::Time::currentTsMs();
@@ -69,12 +70,6 @@ int PCHCheckDriver::run(
   // PCH compilation.
   startTsMs = illvm::Time::currentTsMs();
   metaData->flag = 2;
-  lines = illvm::FileSystem::readLines(metaData->inputPath);
-  for (int i = 0; i < pchLine; i++) {
-    lines[i] = "";
-  }
-  metaData->hackedMainBuffer = illvm::Strings::vecToStr(lines);
-  metaData->hackedMainBufferRef = metaData->hackedMainBuffer;
   res = DriverBase::compile(clangDriver, originalArgv, -1, "", -1, "", -1, "",
                             {}, {"-include-pch", metaData->pchPath.c_str()});
   endTsMs = illvm::Time::currentTsMs();

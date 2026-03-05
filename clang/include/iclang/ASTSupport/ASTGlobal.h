@@ -79,6 +79,11 @@ public:
     return sema->getSourceManager();
   }
 
+  clang::SourceManager &getSourceManagerM() {
+    assert(sema != nullptr);
+    return sema->getSourceManager();
+  }
+
   const clang::LangOptions &getLangOpts() const {
     assert(sema != nullptr);
     return sema->getLangOpts();

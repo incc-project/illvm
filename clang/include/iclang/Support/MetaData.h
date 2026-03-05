@@ -289,9 +289,7 @@ public:
   // 0: normal, 1: make pch, 2: pch, 3: pch + funcx.
   int flag = 0;
 
-  std::string hackedMainBuffer = "";
-
-  llvm::StringRef hackedMainBufferRef = "";
+  int pchLine = 0;
 
   std::string headerPath = "";
 
