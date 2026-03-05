@@ -27,8 +27,9 @@
 #include <memory>
 
 // IClang begin
-#include "iclang/Support/Global.h"
 #include "iclang/ASTSupport/ASTGlobal.h"
+#include "iclang/Support/Global.h"
+#include "illvm/Support/FileSystem.h"
 // IClang end
 
 using namespace clang;
@@ -146,6 +147,8 @@ void clang::ParseAST(Sema &S, bool PrintStats, bool SkipFunctionBodies) {
           newContent += buffer[i];
         }
       }
+
+      illvm::FileSystem::saveStr(metaData->srcCheckPath, newContent);
 
       auto newBuffer =
           llvm::MemoryBuffer::getMemBufferCopy(newContent);

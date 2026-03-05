@@ -27,6 +27,7 @@ int PCHCheckDriver::run(
   const auto workPath = metaData->iClangDirPath[CurDir];
   metaData->pchPath = illvm::FileSystem::linkPath(workPath, "header.pch");
   metaData->headerPath = illvm::FileSystem::linkPath(workPath, "header.h");
+  metaData->srcCheckPath = illvm::FileSystem::linkPath(workPath, "srcCheck.cpp");
   const auto &pchInfoMap = global.getIClangConfig().pchInfoMap;
 
   // Original compilation.
