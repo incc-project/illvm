@@ -118,9 +118,9 @@ bool Preprocessor::EnterSourceFile(FileID FID, ConstSearchDirIterator CurDir,
   }
   else if (global.isIClangMode(iclang::IClangMode::PCHCheckMode)) {
     auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
-    if (FID == SourceMgr.getMainFileID() && metaData->flag == 2) {
-      llvm::errs() << InputFile->getBuffer() << "\n";
-    }
+    // if (FID == SourceMgr.getMainFileID() && metaData->flag == 2) {
+    //   llvm::errs() << InputFile->getBuffer() << "\n";
+    // }
   }
   // IClang end
 
