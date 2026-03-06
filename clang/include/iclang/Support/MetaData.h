@@ -301,15 +301,12 @@ public:
 
   long long pchTimeMs = 0;
 
-  long long pchFuncXTimeMs = 0;
-
   // Format:
   // MetaData
   // pchLine
   // originalTimeMs
   // makePCHTimeMs
   // pchTimeMs
-  // pchFuncXTimeMs
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
