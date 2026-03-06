@@ -9,6 +9,7 @@ add_clang_library(clangIClangSupport
   Global.cpp
   MetaData.cpp
   Mode.cpp
+  PCHPreamble.cpp
 
   DEPENDS
   ClangDriverOptions

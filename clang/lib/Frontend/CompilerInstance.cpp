@@ -1001,7 +1001,7 @@ bool CompilerInstance::InitializeSourceManager(const FrontendInputFile &Input,
   auto &global = iclang::Global::getInstance();
   if (global.isIClangMode(iclang::IClangMode::PCHCheckMode)) {
     auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
-    if (metaData->flag == 2 && metaData->pchLine > 0) {
+    if (metaData->flag >= 2 && metaData->pchLine > 0) {
       FileID FID = SourceMgr.getMainFileID();
       const FileEntry *FE = SourceMgr.getFileEntryForID(FID);
 

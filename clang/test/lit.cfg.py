@@ -294,9 +294,15 @@ config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"
 # IClang begin
 config.substitutions.append(('%illvm-tool', os.path.join(config.llvm_obj_root, 'bin', 'illvm-tool')))
 config.substitutions.append((
-    "%iclang-ilexercheck",
+    "%iclang-init",
+    os.path.join(config.llvm_obj_root, 'bin', 'illvm-tool') + " rm %S/test.o.iclang && " +
+    os.path.join(config.llvm_obj_root, 'bin', 'illvm-tool') + " rm %S/test.o.iclangtmp && " +
+    os.path.join(config.llvm_obj_root, 'bin', 'illvm-tool') + " rm %S/test.o"
+))
+config.substitutions.append((
+    "%iclangc",
     os.path.join(config.llvm_obj_root, 'bin', 'clang++') +
     " -c -ffunction-sections -fdata-sections -o %S/test.o -c %S/test.cpp " +
-    "-iclang=\"ILexerCheck\""
+    "-iclang=\"%S/config.json\""
 ))
 # IClang end

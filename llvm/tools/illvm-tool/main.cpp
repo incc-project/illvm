@@ -282,6 +282,26 @@ public:
   }
 };
 
+class RemoveTask : public ExecutingTask {
+private:
+  int runImpl(const std::vector<std::string> &argValues) const override {
+    const std::string inputPath = argValues[0];
+    illvm::FileSystem::rmFile(inputPath);
+    return 0;
+  }
+
+  explicit RemoveTask(ILLVMToolTask *iLLVMToolTask)
+      : ExecutingTask("rm", "rm -rf inputPath", iLLVMToolTask) {
+    argNames.emplace_back("inputPath");
+  }
+
+public:
+  __attribute__((constructor)) static RemoveTask *getInstance() {
+    static RemoveTask instance(ILLVMToolTask::getInstance());
+    return &instance;
+  }
+};
+
 class FuncVTask : public ForwardingTask {
 private:
   explicit FuncVTask(ILLVMToolTask *iLLVMToolTask)

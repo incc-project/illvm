@@ -1,5 +1,7 @@
 #include "iclang/Driver/CheckDriver.h"
 
+#include "iclang/Support/PCHPreamble.h"
+
 #include "illvm/Support/Diagnostics.h"
 #include "illvm/Support/FileSystem.h"
 #include "illvm/Support/Strings.h"
@@ -27,7 +29,6 @@ int PCHCheckDriver::run(
   const auto workPath = metaData->iClangDirPath[CurDir];
   metaData->pchPath = illvm::FileSystem::linkPath(workPath, "header.pch");
   metaData->headerPath = illvm::FileSystem::linkPath(workPath, "header.h");
-  metaData->srcCheckPath = illvm::FileSystem::linkPath(workPath, "srcCheck.cpp");
   const auto &pchInfoMap = global.getIClangConfig().pchInfoMap;
 
   // Original compilation.
@@ -44,6 +45,11 @@ int PCHCheckDriver::run(
   if (const auto pchLineIt = pchInfoMap.find(metaData->inputPath);
       pchLineIt != pchInfoMap.end()) {
     pchLine = pchLineIt->second;
+  }
+  // user did not provide pchLine, or provided invalid pchLine: auto preamble.
+  if (pchLine <= 0) {
+    pchLine = PCHPreamble::getPCHLine(
+        illvm::FileSystem::readLines(metaData->inputPath));
   }
   if (pchLine <= 0) {
     DriverBase::fini(global);
@@ -80,17 +86,17 @@ int PCHCheckDriver::run(
   }
 
   // PCH + FuncX
-  // startTsMs = illvm::Time::currentTsMs();
-  // metaData->flag = 3;
-  // res = DriverBase::compile(
-  //     clangDriver, originalArgv, -1, "", -1, "", -1, "", {},
-  //     {"-include-pch", metaData->pchPath.c_str(), "-Wno-unused-function",
-  //      "-Wno-unused-const-variable", "-Wno-unused-private-field",
-  //      "-Wno-undefined-internal", "-Wno-unused-variable",
-  //      "-Wno-unused-parameter", "-Wno-undefined-inline",
-  //      "-Wno-unused-but-set-variable"});
-  // endTsMs = illvm::Time::currentTsMs();
-  // metaData->pchFuncXTimeMs = endTsMs - startTsMs;
+  startTsMs = illvm::Time::currentTsMs();
+  metaData->flag = 3;
+  res = DriverBase::compile(
+      clangDriver, originalArgv, -1, "", -1, "", -1, "", {},
+      {"-include-pch", metaData->pchPath.c_str(), "-Wno-unused-function",
+       "-Wno-unused-const-variable", "-Wno-unused-private-field",
+       "-Wno-undefined-internal", "-Wno-unused-variable",
+       "-Wno-unused-parameter", "-Wno-undefined-inline",
+       "-Wno-unused-but-set-variable"});
+  endTsMs = illvm::Time::currentTsMs();
+  metaData->pchFuncXTimeMs = endTsMs - startTsMs;
 
   DriverBase::fini(global);
   return res;

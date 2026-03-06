@@ -295,8 +295,6 @@ public:
 
   std::string pchPath = "";
 
-  std::string srcCheckPath = "";
-
   long long originalTimeMs = 0;
 
   long long makePCHTimeMs = 0;
@@ -307,6 +305,7 @@ public:
 
   // Format:
   // MetaData
+  // pchLine
   // originalTimeMs
   // makePCHTimeMs
   // pchTimeMs

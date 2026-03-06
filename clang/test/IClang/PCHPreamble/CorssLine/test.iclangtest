@@ -1,0 +1,3 @@
+; RUN: %iclang-init
+; RUN: %iclangc
+; RUN: %illvm-tool jsonCheck %S/test.o.iclang/compile.json pchLine 8 int

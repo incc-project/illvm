@@ -245,6 +245,7 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
 llvm::json::Object PCHCheckMetaData::serialize() const {
   auto root = MetaData::serialize();
 
+  root["pchLine"] = pchLine;
   root["originalTimeMs"] = originalTimeMs;
   root["makePCHTimeMs"] = makePCHTimeMs;
   root["pchTimeMs"] = pchTimeMs;
@@ -256,6 +257,7 @@ llvm::json::Object PCHCheckMetaData::serialize() const {
 void PCHCheckMetaData::deserialize(llvm::json::Object &root) {
   MetaData::deserialize(root);
 
+  pchLine = root["pchLine"].getAsInteger().value();
   originalTimeMs = root["originalTimeMs"].getAsInteger().value();
   makePCHTimeMs = root["makePCHTimeMs"].getAsInteger().value();
   pchTimeMs = root["pchTimeMs"].getAsInteger().value();
