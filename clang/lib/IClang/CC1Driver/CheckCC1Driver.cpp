@@ -20,10 +20,6 @@ void SourceRangeCheckCC1Driver::run() {
   sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
 
   metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
-  const auto firstMainDeclLoc = sourceRangeCheckAnalysis.getFirstMainDeclLoc();
-  metaData->firstMainDeclOffset = firstMainDeclLoc.first;
-  metaData->firstMainDeclLine = firstMainDeclLoc.second.first;
-  metaData->firstMainDeclColumn = firstMainDeclLoc.second.second;
 }
 
 void IncLineCheckCC1Driver::run() {
@@ -81,10 +77,6 @@ void FuncXCheckCC1Driver::run() {
   sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
 
   metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
-  const auto firstMainDeclLoc = sourceRangeCheckAnalysis.getFirstMainDeclLoc();
-  metaData->firstMainDeclOffset = firstMainDeclLoc.first;
-  metaData->firstMainDeclLine = firstMainDeclLoc.second.first;
-  metaData->firstMainDeclColumn = firstMainDeclLoc.second.second;
 }
 
 void DumpCC1Driver::run() {

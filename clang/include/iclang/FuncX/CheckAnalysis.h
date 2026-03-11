@@ -34,9 +34,6 @@ private:
 
   bool inClass = false;
 
-  bool isFirstMainDecl = true;
-  std::pair<long long, std::pair<size_t, size_t>> firstMainDeclLoc;
-
 public:
   explicit SourceRangeCheckAnalysis(ASTGlobal &_astGlobal) : astGlobal(_astGlobal) {}
 
@@ -47,10 +44,6 @@ public:
   bool TraverseDecl(clang::Decl *decl);
 
   std::vector<DeclInfo> &&extractDeclInfos() { return std::move(declInfos); }
-
-  std::pair<long long, std::pair<size_t, size_t>> getFirstMainDeclLoc() const {
-    return firstMainDeclLoc;
-  }
 };
 
 class IncLineCheckAnalysis

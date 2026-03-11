@@ -95,24 +95,6 @@ bool ASTGlobal::isMainFileDecl(const clang::Decl *decl) const {
   return loc.isValid() && getSourceManager().isInMainFile(loc);
 }
 
-std::string ASTGlobal::dumpDecl(const clang::Decl *decl) const {
-  if (decl == nullptr) {
-    return "nullptr";
-  }
-
-  std::ostringstream oss;
-
-  oss << "[" << decl->getDeclKindName() << "] " << decl << " ";
-
-  if (auto *namedDecl = llvm::dyn_cast<clang::NamedDecl>(decl)) {
-    oss << namedDecl->getNameAsString() + "(" + getMangledName(namedDecl) + ")";
-  }
-
-  oss << getDeclSourceInterval(decl).toString();
-
-  return oss.str();
-}
-
 bool ASTGlobal::hasAutoReturn(const clang::FunctionDecl *FD) {
   const clang::QualType RT = FD->getReturnType();
   const clang::Type *T = RT.getTypePtr();
@@ -185,6 +167,24 @@ bool ASTGlobal::isValidFuncBody(const clang::FunctionDecl *funcDecl) const {
     return false;
   }
   return true;
+}
+
+std::string ASTGlobal::dumpDecl(const clang::Decl *decl) const {
+  if (decl == nullptr) {
+    return "nullptr";
+  }
+
+  std::ostringstream oss;
+
+  oss << "[" << decl->getDeclKindName() << "] " << decl << " ";
+
+  if (auto *namedDecl = llvm::dyn_cast<clang::NamedDecl>(decl)) {
+    oss << namedDecl->getNameAsString() + "(" + getMangledName(namedDecl) + ")";
+  }
+
+  oss << getDeclSourceInterval(decl).toString();
+
+  return oss.str();
 }
 
 } // namespace iclang

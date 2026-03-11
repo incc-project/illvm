@@ -551,7 +551,7 @@ void Parser::ParseLexedMethodDef(LexedMethod &LM) {
       auto mangledName = astGlobal.getMangledName(funcDecl);
       auto it = metaData->visited.find(mangledName);
       ILLVM_FCHECK(it != metaData->visited.end(), astGlobal.dumpDecl(funcDecl));
-      metaData->declInfos[it->second].funcXed = true;
+      metaData->declInfos[it->second].tags += "(funcxed)";
       return;
     }
   }

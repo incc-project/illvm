@@ -99,17 +99,17 @@ public:
 
   bool isMainFileDecl(const clang::Decl *decl) const;
 
-  std::string dumpDecl(const clang::Decl *decl) const;
-
-  const char* dumpOriginalCode(const clang::SourceLocation &loc) const {
-    return getSourceManager().getCharacterData(loc);
-  }
-
   static bool hasAutoReturn(const clang::FunctionDecl *FD);
 
   bool isValidFuncHeader(const clang::FunctionDecl *funcDecl) const;
 
   bool isValidFuncBody(const clang::FunctionDecl *funcDecl) const;
+
+  std::string dumpDecl(const clang::Decl *decl) const;
+
+  const char* dumpOriginalCode(const clang::SourceLocation &loc) const {
+    return getSourceManager().getCharacterData(loc);
+  }
 };
 
 } // namespace iclang

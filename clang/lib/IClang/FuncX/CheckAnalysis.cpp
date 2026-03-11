@@ -31,12 +31,6 @@ bool SourceRangeCheckAnalysis::TraverseDecl(clang::Decl *decl) {
   declInfo.endLine = sourceInterval.endLine;
   declInfo.endColumn = sourceInterval.endColumn;
 
-  if (isFirstMainDecl) {
-    firstMainDeclLoc = {sourceInterval.startOffset,
-                        {sourceInterval.startLine, sourceInterval.startColumn}};
-  }
-  isFirstMainDecl = false;
-
   if (llvm::dyn_cast<clang::VarDecl>(decl) != nullptr) {
     // Ignore in-var-decl.
     return true;

@@ -200,13 +200,9 @@ llvm::json::Object SourceRangeCheckMetaData::serialize() const {
       {"endColumn", declInfo.endColumn},
       {"mangledName", declInfo.mangledName},
       {"tags", declInfo.tags},
-      {"funcXed", declInfo.funcXed},
     });
   }
   root["declInfos"] = llvm::json::Value(std::move(arr));
-  root["firstMainDeclOffset"] = firstMainDeclOffset;
-  root["firstMainDeclLine"] = firstMainDeclLine;
-  root["firstMainDeclColumn"] = firstMainDeclColumn;
 
   return root;
 }
@@ -234,12 +230,8 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
     declInfo.endColumn = obj->getInteger("endColumn").value();
     declInfo.mangledName = obj->getString("mangledName").value().str();
     declInfo.tags = obj->getString("tags").value().str();
-    declInfo.funcXed = obj->getBoolean("funcXed").value();
     declInfos.emplace_back(declInfo);
   }
-  firstMainDeclOffset = root["firstMainDeclOffset"].getAsInteger().value();
-  firstMainDeclLine = root["firstMainDeclLine"].getAsInteger().value();
-  firstMainDeclColumn = root["firstMainDeclColumn"].getAsInteger().value();
 }
 
 llvm::json::Object PCHCheckMetaData::serialize() const {

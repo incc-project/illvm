@@ -262,23 +262,15 @@ public:
     unsigned startLine = 0, startColumn = 0;
     unsigned endLine = 0, endColumn = 0;
     std::string mangledName;
-    std::string tags;
-    bool funcXed = false;
+    std::string tags; // format:(xxx)(xxx)(xxx)...
   };
 
   std::vector<DeclInfo> declInfos;
 
-  unsigned firstMainDeclOffset = 0;
-  unsigned firstMainDeclLine = 0;
-  unsigned firstMainDeclColumn = 0;
-
   // Format:
   // MetaData
   // declInfos: [{type, name, startLine, startColumn, endLine, endColumn,
-  // mangledName, tags, funcXed}]
-  // firstMainDeclOffset
-  // firstMainDeclLine
-  // firstMainDeclColumn
+  // mangledName, tags}]
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
