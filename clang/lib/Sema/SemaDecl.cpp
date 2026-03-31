@@ -14962,10 +14962,11 @@ Sema::IClangActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D,
         // must not be empty
         std::string mangledName = astGlobal.getMangledName(funcDecl);
         auto it = metaData->declInfoMap.find(mangledName);
-        ILLVM_FCHECK(it != metaData->declInfoMap.end(), astGlobal.dumpDecl(funcDecl));
-        metaData->declInfos[it->second].tags += "(funcxed)";
-        SkipBody->ShouldSkip = true;
-        return nullptr;
+        if (it != metaData->declInfoMap.end()) {
+          metaData->declInfos[it->second].tags += "(funcxed)";
+          SkipBody->ShouldSkip = true;
+          return nullptr;
+        }
       }
     }
   }

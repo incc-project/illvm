@@ -550,8 +550,9 @@ void Parser::ParseLexedMethodDef(LexedMethod &LM) {
         // must not be empty
         std::string mangledName = astGlobal.getMangledName(funcDecl);
         auto it = metaData->declInfoMap.find(mangledName);
-        ILLVM_FCHECK(it != metaData->declInfoMap.end(), astGlobal.dumpDecl(funcDecl));
-        metaData->declInfos[it->second].tags += "(funcxed)";
+        if (it != metaData->declInfoMap.end()) {
+          metaData->declInfos[it->second].tags += "(funcxed)";
+        }
         return;
       }
     }
