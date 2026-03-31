@@ -998,35 +998,44 @@ bool CompilerInstance::InitializeSourceManager(const FrontendInputFile &Input,
          "Couldn't establish MainFileID!");
 
   // IClang begin
+  auto hackBuf = [&SourceMgr](const int pchLine) {
+    FileID FID = SourceMgr.getMainFileID();
+    const FileEntry *FE = SourceMgr.getFileEntryForID(FID);
+
+    StringRef buffer = SourceMgr.getBufferData(FID);
+
+    std::string newContent;
+    int line = 0;
+
+    for (size_t i = 0; i < buffer.size(); ++i) {
+      if (line < pchLine) {
+        if (buffer[i] == '\n') {
+          line++;
+          newContent += '\n';
+        } else {
+          newContent += ' ';
+        }
+      } else {
+        newContent += buffer[i];
+      }
+    }
+
+    auto newBuffer =
+        llvm::MemoryBuffer::getMemBufferCopy(newContent, FE->getName());
+
+    SourceMgr.overrideFileContents(FE, std::move(newBuffer));
+  };
+
   auto &global = iclang::Global::getInstance();
   if (global.isIClangMode(iclang::IClangMode::PCHCheckMode)) {
     auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
     if (metaData->flag >= 2 && metaData->pchLine > 0) {
-      FileID FID = SourceMgr.getMainFileID();
-      const FileEntry *FE = SourceMgr.getFileEntryForID(FID);
-
-      StringRef buffer = SourceMgr.getBufferData(FID);
-
-      std::string newContent;
-      int line = 0;
-
-      for (size_t i = 0; i < buffer.size(); ++i) {
-        if (line < metaData->pchLine) {
-          if (buffer[i] == '\n') {
-            line++;
-            newContent += '\n';
-          } else {
-            newContent += ' ';
-          }
-        } else {
-          newContent += buffer[i];
-        }
-      }
-
-      auto newBuffer =
-          llvm::MemoryBuffer::getMemBufferCopy(newContent, FE->getName());
-
-      SourceMgr.overrideFileContents(FE, std::move(newBuffer));
+      hackBuf(metaData->pchLine);
+    }
+  } else if (global.isIClangMode(iclang::IClangMode::BasicFuncXCheckMode)) {
+    auto metaData = global.getMetaData<iclang::BasicFuncXCheckMetaData>();
+    if (metaData->flag >= 3 && metaData->pchLine > 0) {
+      hackBuf(metaData->pchLine);
     }
   }
   // IClang end

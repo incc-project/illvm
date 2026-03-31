@@ -55,6 +55,10 @@ class PCHCheckASTMetaData final : public ASTMetaData {
 public:
 };
 
+class BasicFuncXCheckASTMetaData final : public ASTMetaData {
+public:
+};
+
 class IncLineCheckASTMetaData final : public ASTMetaData {
 public:
   static void injectIClangLineWMacro(clang::Sema &sema);
@@ -63,10 +67,6 @@ public:
 };
 
 class LineMacroCheckASTMetaData final : public ASTMetaData {
-public:
-};
-
-class BasicFuncXCheckASTMetaData final : public ASTMetaData {
 public:
 };
 

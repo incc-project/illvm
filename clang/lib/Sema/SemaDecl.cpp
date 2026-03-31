@@ -14954,26 +14954,19 @@ Sema::IClangActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D,
   // IClang begin
   auto &global = iclang::Global::getInstance();
   auto &astGlobal = iclang::ASTGlobal::getInstance();
-  if (global.isIClangMode(iclang::IClangMode::FuncXCheckMode) && DP != nullptr) {
-    auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
-    auto *funcDecl = dyn_cast<FunctionDecl>(DP);
-    if (metaData->enableFuncXCheckFlag && funcDecl != nullptr &&
-        astGlobal.isValidFuncHeader(funcDecl)) {
-      auto mangledName = astGlobal.getMangledName(funcDecl);
-      auto it = metaData->visited.find(mangledName);
-      ILLVM_FCHECK(it != metaData->visited.end(), astGlobal.dumpDecl(funcDecl));
-      metaData->declInfos[it->second].tags += "funcxed";
-      SkipBody->ShouldSkip = true;
-      return nullptr;
-    }
-  }
-  if (global.isIClangMode(iclang::IClangMode::PCHCheckMode) && DP != nullptr) {
-    auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
-    auto *funcDecl = dyn_cast<FunctionDecl>(DP);
-    if (metaData->flag == 3 && funcDecl != nullptr &&
-        astGlobal.isValidFuncHeader(funcDecl)) {
-      SkipBody->ShouldSkip = true;
-      return nullptr;
+  auto *funcDecl = dyn_cast<FunctionDecl>(DP);
+  if (funcDecl != nullptr) {
+    if (global.isIClangMode(iclang::IClangMode::BasicFuncXCheckMode)) {
+      auto metaData = global.getMetaData<iclang::BasicFuncXCheckMetaData>();
+      if (metaData->flag == 4 && astGlobal.isValidFuncHeader(funcDecl)) {
+        // must not be empty
+        std::string mangledName = astGlobal.getMangledName(funcDecl);
+        auto it = metaData->declInfoMap.find(mangledName);
+        ILLVM_FCHECK(it != metaData->declInfoMap.end(), astGlobal.dumpDecl(funcDecl));
+        metaData->declInfos[it->second].tags += "(funcxed)";
+        SkipBody->ShouldSkip = true;
+        return nullptr;
+      }
     }
   }
   // IClang end

@@ -906,13 +906,15 @@ static void checkUndefinedButUsed(Sema &S) {
       assert(FD->getMostRecentDecl()->isInlined() &&
              "used object requires definition but isn't inline or internal?");
       // IClang Begin
-      const auto &global = iclang::Global::getInstance();
-      const auto &astGlobal = iclang::ASTGlobal::getInstance();
-      if (!global.isIClangMode(iclang::IClangMode::ClangMode) &&
-          !astGlobal.isDisableWarningDecl(FD)) {
-        // FIXME: This is ill-formed; we should reject.
-        S.Diag(VD->getLocation(), diag::warn_undefined_inline) << VD;
-          }
+      // const auto &global = iclang::Global::getInstance();
+      // const auto &astGlobal = iclang::ASTGlobal::getInstance();
+      // if (!global.isIClangMode(iclang::IClangMode::ClangMode) &&
+      //     !astGlobal.isDisableWarningDecl(FD)) {
+      //   S.Diag(VD->getLocation(), diag::warn_undefined_inline) << VD;
+      //     }
+
+      // FIXME: This is ill-formed; we should reject.
+      S.Diag(VD->getLocation(), diag::warn_undefined_inline) << VD;
       // IClang End
     } else {
       assert(cast<VarDecl>(VD)->getMostRecentDecl()->isInline() &&

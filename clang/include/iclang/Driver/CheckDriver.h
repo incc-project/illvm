@@ -31,6 +31,13 @@ public:
                  const clang::driver::Driver &clangDriver);
 };
 
+class BasicFuncXCheckDriver {
+public:
+  static int run(Global &global,
+                 const llvm::SmallVector<const char *, 128> &originalArgv,
+                 const clang::driver::Driver &clangDriver);
+};
+
 class IncLineCheckDriver {
 public:
   static int run(Global &global,
@@ -39,13 +46,6 @@ public:
 };
 
 class LineMacroCheckDriver {
-public:
-  static int run(Global &global,
-                 const llvm::SmallVector<const char *, 128> &originalArgv,
-                 const clang::driver::Driver &clangDriver);
-};
-
-class BasicFuncXCheckDriver {
 public:
   static int run(Global &global,
                  const llvm::SmallVector<const char *, 128> &originalArgv,

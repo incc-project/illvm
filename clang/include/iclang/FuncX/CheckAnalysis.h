@@ -26,7 +26,7 @@ namespace funcx {
 class SourceRangeCheckAnalysis
     : public clang::RecursiveASTVisitor<SourceRangeCheckAnalysis> {
 public:
-  using DeclInfo = SourceRangeCheckMetaData::DeclInfo;
+  using DeclInfo = IDeclInfo;
 
 private:
   ASTGlobal &astGlobal;

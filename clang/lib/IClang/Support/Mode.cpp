@@ -38,9 +38,9 @@
 //    Record normal compilation time, PCH making time, PCH optimization time.
 //    Check:
 //    no pch, compilation error.
+// * "BasicFuncXCheck": Todo.
 // * "IncLineCheck": Todo: merge IncLineCheck to LineMacroCheck.
 // * "LineMacroCheck": Todo.
-// * "BasicFuncXCheck": Todo.
 // * "DiffCheck": Todo.
 // * "FuncXCheck": Todo.
 // * "Dump": AST dump mode.

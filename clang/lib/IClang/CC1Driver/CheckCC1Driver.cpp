@@ -39,6 +39,34 @@ void IncLineCheckCC1Driver::run() {
   metaData->baseFuncDefNum = incLineCheckAnalysis.getFuncDefNum();
 }
 
+void BasicFuncXCheckCC1Driver::run() {
+  auto &global = Global::getInstance();
+
+  assert(global.getIClangMode() == IClangMode::BasicFuncXCheckMode);
+
+  auto &astGlobal = ASTGlobal::getInstance();
+  auto &context = astGlobal.getContext();
+
+  auto metaData = global.getMetaData<BasicFuncXCheckMetaData>();
+  const auto astMetaData = astGlobal.getASTMetaData<BasicFuncXCheckASTMetaData>();
+
+  if (metaData->flag != 1) {
+    return;
+  }
+
+  funcx::SourceRangeCheckAnalysis sourceRangeCheckAnalysis(astGlobal);
+  sourceRangeCheckAnalysis.TraverseDecl(context.getTranslationUnitDecl());
+
+  metaData->declInfos = sourceRangeCheckAnalysis.extractDeclInfos();
+  for (size_t i = 0; i < metaData->declInfos.size(); i++) {
+    auto &declInfo = metaData->declInfos[i];
+    if (declInfo.mangledName.empty()) {
+      continue;
+    }
+    metaData->declInfoMap[declInfo.mangledName] = i;
+  }
+}
+
 void LineMacroCheckCC1Driver::run() {
   auto &global = Global::getInstance();
 

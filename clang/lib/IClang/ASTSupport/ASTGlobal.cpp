@@ -29,15 +29,6 @@ void ASTGlobal::init(const Global &global, clang::Sema *_sema) {
   firstInit = false;
 }
 
-void ASTGlobal::addDisableWarningDecl(const clang::Decl *decl) {
-  disableWarningDecls.insert(decl->getCanonicalDecl());
-}
-
-bool ASTGlobal::isDisableWarningDecl(const clang::Decl *decl) const {
-  return disableWarningDecls.find(decl->getCanonicalDecl()) !=
-         disableWarningDecls.end();
-}
-
 std::string ASTGlobal::getMangledName(const clang::NamedDecl *decl) const {
   if (decl && decl->getDeclName()) {
     if (llvm::isa<clang::RequiresExprBodyDecl>(decl->getDeclContext())) {

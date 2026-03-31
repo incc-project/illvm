@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "illvm/Support/Interval.h"
+#include "illvm/Support/Diagnostics.h"
 #include "llvm/Support/JSON.h"
 
 namespace iclang {
@@ -254,18 +255,18 @@ public:
   void deserialize(llvm::json::Object &root) override;
 };
 
+struct IDeclInfo {
+  std::string type; // function, class, template
+  std::string name;
+  unsigned startLine = 0, startColumn = 0;
+  unsigned endLine = 0, endColumn = 0;
+  std::string mangledName;
+  std::string tags; // format:(xxx)(xxx)(xxx)...
+};
+
 class SourceRangeCheckMetaData : public MetaData {
 public:
-  struct DeclInfo {
-    std::string type; // function, class, template
-    std::string name;
-    unsigned startLine = 0, startColumn = 0;
-    unsigned endLine = 0, endColumn = 0;
-    std::string mangledName;
-    std::string tags; // format:(xxx)(xxx)(xxx)...
-  };
-
-  std::vector<DeclInfo> declInfos;
+  std::vector<IDeclInfo> declInfos;
 
   // Format:
   // MetaData
@@ -278,7 +279,7 @@ public:
 
 class PCHCheckMetaData final : public MetaData {
 public:
-  // 0: normal, 1: make pch, 2: pch, 3: pch + funcx.
+  // 0: normal, 1: make pch, 2: pch
   int flag = 0;
 
   int pchLine = 0;
@@ -302,6 +303,45 @@ public:
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
+};
+
+class BasicFuncXCheckMetaData final : public MetaData {
+public:
+  std::vector<IDeclInfo> declInfos;
+  // Do not change declInfos after generating declInfoMap
+  std::unordered_map<std::string, int> declInfoMap;
+
+  // 0: normal, 1: source range check, 2: make pch, 3: pch, 4: pch + funcx.
+  int flag = 0;
+
+  int pchLine = 0;
+
+  std::string headerPath = "";
+
+  std::string pchPath = "";
+
+  long long originalTimeMs = 0;
+
+  long long makePCHTimeMs = 0;
+
+  long long pchTimeMs = 0;
+
+  long long pchFuncXTimeMs = 0;
+
+  // Format:
+  // MetaData
+  // declInfos: [{type, name, startLine, startColumn, endLine, endColumn,
+  // mangledName, tags}]
+  // pchLine
+  // originalTimeMs
+  // makePCHTimeMs
+  // pchTimeMs
+  // pchFuncXTimeMs
+  llvm::json::Object serialize() const override;
+
+  void deserialize(llvm::json::Object &root) override {
+    ILLVM_FCHECK(false, "Unreachable");
+  }
 };
 
 class IncLineCheckMetaData : public MetaData {
@@ -335,10 +375,6 @@ public:
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;
-};
-
-class BasicFuncXCheckMetaData final : public MetaData {
-public:
 };
 
 class DiffCheckMetaData final : public MetaData {

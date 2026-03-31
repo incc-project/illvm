@@ -25,6 +25,11 @@ public:
   static void run() {}
 };
 
+class BasicFuncXCheckCC1Driver {
+public:
+  static void run();
+};
+
 class IncLineCheckCC1Driver {
 public:
   static void run();
@@ -33,11 +38,6 @@ public:
 class LineMacroCheckCC1Driver {
 public:
   static void run();
-};
-
-class BasicFuncXCheckCC1Driver {
-public:
-  static void run() {}
 };
 
 class DiffCheckCC1Driver {

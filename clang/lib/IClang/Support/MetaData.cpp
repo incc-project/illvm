@@ -221,7 +221,7 @@ void SourceRangeCheckMetaData::deserialize(llvm::json::Object &root) {
     ILLVM_FCHECK(obj != nullptr,
                     "Failed to parse JSON: Can not convert declInfo to "
                     "json object");
-    DeclInfo declInfo;
+    IDeclInfo declInfo;
     declInfo.type = obj->getString("type").value().str();
     declInfo.name = obj->getString("name").value().str();
     declInfo.startLine = obj->getInteger("startLine").value();
@@ -252,6 +252,33 @@ void PCHCheckMetaData::deserialize(llvm::json::Object &root) {
   originalTimeMs = root["originalTimeMs"].getAsInteger().value();
   makePCHTimeMs = root["makePCHTimeMs"].getAsInteger().value();
   pchTimeMs = root["pchTimeMs"].getAsInteger().value();
+}
+
+llvm::json::Object BasicFuncXCheckMetaData::serialize() const {
+  auto root = MetaData::serialize();
+
+  llvm::json::Array arr;
+  for (const auto &declInfo : declInfos) {
+    arr.emplace_back(llvm::json::Object{
+      {"type", declInfo.type},
+      {"name", declInfo.name},
+      {"startLine", declInfo.startLine},
+      {"startColumn", declInfo.startColumn},
+      {"endLine", declInfo.endLine},
+      {"endColumn", declInfo.endColumn},
+      {"mangledName", declInfo.mangledName},
+      {"tags", declInfo.tags},
+    });
+  }
+  root["declInfos"] = llvm::json::Value(std::move(arr));
+
+  root["pchLine"] = pchLine;
+  root["originalTimeMs"] = originalTimeMs;
+  root["makePCHTimeMs"] = makePCHTimeMs;
+  root["pchTimeMs"] = pchTimeMs;
+  root["pchFuncXTimeMs"] = pchFuncXTimeMs;
+
+  return root;
 }
 
 llvm::json::Object IncLineCheckMetaData::serialize() const {

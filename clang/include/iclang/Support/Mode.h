@@ -25,9 +25,9 @@
   X(ShareCheck)                                                                \
   X(SourceRangeCheck)                                                          \
   X(PCHCheck)                                                                  \
+  X(BasicFuncXCheck)                                                           \
   X(IncLineCheck)                                                              \
   X(LineMacroCheck)                                                            \
-  X(BasicFuncXCheck)                                                           \
   X(DiffCheck)                                                                 \
   X(FuncXCheck)                                                                \
   X(Dump)                                                                      \

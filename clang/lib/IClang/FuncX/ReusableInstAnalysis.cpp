@@ -300,7 +300,7 @@ void ReusableInstAnalysis::run(std::deque<VSPair> &pendingInstQue) {
       if (canBeFuncXed(funcDecl)) {
         const std::string mangledName = astGlobal.getMangledName(funcDecl);
         incMetaData->funcXSet.insert(mangledName);
-        astGlobal.addDisableWarningDecl(funcDecl);
+        // astGlobal.addDisableWarningDecl(funcDecl);
         continue;
       }
     }

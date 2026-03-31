@@ -30,6 +30,8 @@
 
 namespace iclang {
 
+// astMetaData: share among cc1
+// other: Only record the last cc1
 class ASTGlobal {
 private:
   bool firstInit = true;
@@ -40,9 +42,6 @@ private:
 
   // Mangled name generator.
   std::unique_ptr<clang::ASTNameGenerator> astNameGenerator = nullptr;
-
-  // Turn off warnings caused by funcx.
-  std::unordered_set<const clang::Decl*> disableWarningDecls = {};
 
   illvm::OPtr<ASTMetaData> astMetaData;
 
@@ -88,10 +87,6 @@ public:
     assert(sema != nullptr);
     return sema->getLangOpts();
   }
-
-  void addDisableWarningDecl(const clang::Decl *decl);
-
-  bool isDisableWarningDecl(const clang::Decl *decl) const;
 
   std::string getMangledName(const clang::NamedDecl *decl) const;
 

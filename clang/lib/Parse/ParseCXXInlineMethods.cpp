@@ -543,23 +543,17 @@ void Parser::ParseLexedMethodDef(LexedMethod &LM) {
   auto &global = iclang::Global::getInstance();
   auto &astGlobal = iclang::ASTGlobal::getInstance();
   auto *funcDecl = dyn_cast<FunctionDecl>(LM.D);
-  if (global.isIClangMode(iclang::IClangMode::FuncXCheckMode) &&
-      funcDecl != nullptr) {
-    auto metaData = global.getMetaData<iclang::FuncXCheckMetaData>();
-    if (metaData->enableFuncXCheckFlag &&
-        astGlobal.isValidFuncHeader(funcDecl)) {
-      auto mangledName = astGlobal.getMangledName(funcDecl);
-      auto it = metaData->visited.find(mangledName);
-      ILLVM_FCHECK(it != metaData->visited.end(), astGlobal.dumpDecl(funcDecl));
-      metaData->declInfos[it->second].tags += "(funcxed)";
-      return;
-    }
-  }
-  if (global.isIClangMode(iclang::IClangMode::PCHCheckMode) &&
-      funcDecl != nullptr) {
-    auto metaData = global.getMetaData<iclang::PCHCheckMetaData>();
-    if (metaData->flag == 3 && astGlobal.isValidFuncHeader(funcDecl)) {
-      return;
+  if (funcDecl != nullptr) {
+   if (global.isIClangMode(iclang::IClangMode::BasicFuncXCheckMode)) {
+      auto metaData = global.getMetaData<iclang::BasicFuncXCheckMetaData>();
+      if (metaData->flag == 4 && astGlobal.isValidFuncHeader(funcDecl)) {
+        // must not be empty
+        std::string mangledName = astGlobal.getMangledName(funcDecl);
+        auto it = metaData->declInfoMap.find(mangledName);
+        ILLVM_FCHECK(it != metaData->declInfoMap.end(), astGlobal.dumpDecl(funcDecl));
+        metaData->declInfos[it->second].tags += "(funcxed)";
+        return;
+      }
     }
   }
   // IClang end
