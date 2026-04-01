@@ -2440,15 +2440,7 @@ Decl *Parser::ParseFunctionStatementBody(Decl *Decl, ParseScope &BodyScope) {
   SourceLocation LBraceLoc = Tok.getLocation();
 
   // IClang begin.
-  auto *funcDecl = llvm::dyn_cast<FunctionDecl>(Decl);
-  auto &global = iclang::Global::getInstance();
-  auto &astGlobal = iclang::ASTGlobal::getInstance();
-  bool isValid = global.isIClangMode(iclang::IClangMode::IncLineCheckMode) &&
-                 funcDecl != nullptr && astGlobal.isValidFuncHeader(funcDecl);
-  if (isValid) {
-    auto metadata = global.getMetaData<iclang::IncLineCheckMetaData>();
-    metadata->isValidFunctionStack.push_back(true);
-  }
+  // func start
   // IClang end.
 
   PrettyDeclStackTraceEntry CrashInfo(Actions.Context, Decl, LBraceLoc,
@@ -2475,11 +2467,7 @@ Decl *Parser::ParseFunctionStatementBody(Decl *Decl, ParseScope &BodyScope) {
   BodyScope.Exit();
 
   // IClang begin.
-  if (isValid) {
-    // llvm::errs() << "Exit Func " << astGlobal.dumpDecl(funcDecl) << "\n";
-    auto metadata = global.getMetaData<iclang::IncLineCheckMetaData>();
-    metadata->isValidFunctionStack.pop_back();
-  }
+  // func end
   // IClang end.
 
   return Actions.ActOnFinishFunctionBody(Decl, FnBody.get());

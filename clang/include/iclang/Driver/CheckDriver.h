@@ -45,13 +45,6 @@ public:
                  const clang::driver::Driver &clangDriver);
 };
 
-class LineMacroCheckDriver {
-public:
-  static int run(Global &global,
-                 const llvm::SmallVector<const char *, 128> &originalArgv,
-                 const clang::driver::Driver &clangDriver);
-};
-
 class DiffCheckDriver {
 public:
   static int run(Global &global,

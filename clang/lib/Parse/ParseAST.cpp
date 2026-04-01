@@ -123,10 +123,6 @@ void clang::ParseAST(Sema &S, bool PrintStats, bool SkipFunctionBodies) {
   auto &global = iclang::Global::getInstance();
   auto &astGlobal = iclang::ASTGlobal::getInstance();
   astGlobal.init(global, &S);
-  if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
-    iclang::IncLineCheckASTMetaData::injectIClangLineWMacro(S);
-    iclang::IncLineCheckASTMetaData::injectIClangLineFunc(S);
-  }
   // IClang end
 
   // Collect global stats on Decls/Stmts (until we have a module streamer).

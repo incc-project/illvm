@@ -346,32 +346,12 @@ public:
 
 class IncLineCheckMetaData : public MetaData {
 public:
-  const char *lineMacro = "__LINE__";
-  const char *iClangLineWrapper = "__ICLW__";
-  bool hashHashFlag = false;
-
-  int baseFuncDefNum = 0;
-
-  std::unordered_set<std::string> inValidMacro;
-  std::vector<bool> isValidFunctionStack;
+  int skipMacroNum = 0;
+  int skipBuiltinNum = 0;
 
   // MetaData
-  // hashHashFlag
-  // baseFuncDefNum
-  llvm::json::Object serialize() const override;
-
-  void deserialize(llvm::json::Object &root) override;
-};
-
-class LineMacroCheckMetaData final : public MetaData {
-public:
-  unsigned totalFuncNum = 0;
-  unsigned funcWithLineMacroNum = 0;
-
-  // Format:
-  // MetaData
-  // totalFuncNum
-  // funcWithLineMacroNum
+  // skipMacroNum
+  // skipBuiltinNum
   llvm::json::Object serialize() const override;
 
   void deserialize(llvm::json::Object &root) override;

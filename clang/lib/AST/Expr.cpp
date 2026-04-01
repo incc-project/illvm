@@ -38,6 +38,11 @@
 #include <algorithm>
 #include <cstring>
 #include <optional>
+
+// IClang begin
+#include "iclang/Support/Global.h"
+// IClang end
+
 using namespace clang;
 
 const Expr *Expr::getBestDynamicClassTypeExpr() const {
@@ -2299,6 +2304,14 @@ APValue SourceLocExpr::EvaluateInContext(const ASTContext &Ctx,
                         /*isUnsigned=*/true);
     IntVal = getIdentKind() == SourceLocExpr::Line ? PLoc.getLine()
                                                    : PLoc.getColumn();
+    // IClang begin
+    auto &global = iclang::Global::getInstance();
+    if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
+      auto metaData = global.getMetaData<iclang::IncLineCheckMetaData>();
+      metaData->skipBuiltinNum += 1;
+      IntVal = 1;
+    }
+    // IClang end
     return APValue(IntVal);
   }
   case SourceLocExpr::SourceLocStruct: {

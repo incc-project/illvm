@@ -186,13 +186,6 @@ int IncLineCheckDriver::run(
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 
-int LineMacroCheckDriver::run(
-    Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
-    const clang::driver::Driver &clangDriver) {
-  assert(global.getIClangMode() == IClangMode::LineMacroCheckMode);
-  return DriverBase::runBase(global, originalArgv, clangDriver);
-}
-
 int DiffCheckDriver::run(Global &global,
                  const llvm::SmallVector<const char *, 128> &originalArgv,
                  const clang::driver::Driver &clangDriver) {

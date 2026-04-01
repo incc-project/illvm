@@ -61,13 +61,6 @@ public:
 
 class IncLineCheckASTMetaData final : public ASTMetaData {
 public:
-  static void injectIClangLineWMacro(clang::Sema &sema);
-
-  static void injectIClangLineFunc(clang::Sema &sema);
-};
-
-class LineMacroCheckASTMetaData final : public ASTMetaData {
-public:
 };
 
 class DiffCheckASTMetaData final : public ASTMetaData {

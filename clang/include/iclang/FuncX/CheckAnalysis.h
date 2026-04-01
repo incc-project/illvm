@@ -46,50 +46,6 @@ public:
   std::vector<DeclInfo> &&extractDeclInfos() { return std::move(declInfos); }
 };
 
-class IncLineCheckAnalysis
-    : public clang::RecursiveASTVisitor<IncLineCheckAnalysis> {
-private:
-  int funcDefNum = 0;
-  ASTGlobal &astGlobal;
-
-public:
-  explicit IncLineCheckAnalysis(ASTGlobal &_astGlobal)
-      : astGlobal(_astGlobal) {}
-
-  bool shouldVisitTemplateInstantiations() const { return true; }
-
-  bool shouldVisitImplicitCode() const { return true; }
-
-  bool TraverseDecl(clang::Decl *decl);
-
-  int getFuncDefNum() const { return funcDefNum; }
-};
-
-class LineMacroCheckAnalysis
-    : public clang::RecursiveASTVisitor<LineMacroCheckAnalysis> {
-private:
-  ASTGlobal &astGlobal;
-  unsigned totalFuncNum = 0;
-  clang::FunctionDecl *curFuncDecl = nullptr;
-  std::unordered_set<const clang::FunctionDecl *> funcsWithLineMacro;
-
-public:
-  explicit LineMacroCheckAnalysis(ASTGlobal &_astGlobal)
-      : astGlobal(_astGlobal) {}
-
-  bool shouldVisitTemplateInstantiations() const { return false; }
-
-  bool shouldVisitImplicitCode() const { return true; }
-
-  bool TraverseDecl(clang::Decl *decl);
-
-  bool TraverseStmt(clang::Stmt *stmt, DataRecursionQueue *queue = nullptr);
-
-  unsigned getTotalFuncNum() const { return totalFuncNum; }
-
-  unsigned getFuncWithLineMacroNum() const { return funcsWithLineMacro.size(); }
-};
-
 class DumpAnalysis : public clang::RecursiveASTVisitor<DumpAnalysis> {
 private:
   ASTGlobal &astGlobal;

@@ -51,10 +51,6 @@
 #include <string>
 #include <utility>
 
-// IClang begin.
-#include "iclang/Support/Global.h"
-// IClang end.
-
 using namespace clang;
 
 //===----------------------------------------------------------------------===//
@@ -3037,27 +3033,6 @@ void Preprocessor::HandleDefineDirective(
       MacroNameTok, ImmediatelyAfterHeaderGuard);
 
   if (!MI) return;
-
-  // IClang begin
-  auto &global = iclang::Global::getInstance();
-  if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
-    auto metaData = global.getMetaData<iclang::IncLineCheckMetaData>();
-    const std::string iiName = II->getName().str();
-    for (size_t i = 0; i < MI->getNumTokens(); i++) {
-      if (MI->getReplacementToken(i).getKind() == tok::hashhash) {
-        metaData->inValidMacro.insert(II->getName().str());
-        break;
-      }
-      if (MI->getReplacementToken(i).getKind() == tok::identifier) {
-        auto nameI = MI->getReplacementToken(i).getIdentifierInfo()->getName().str();
-        if (metaData->inValidMacro.find(nameI) != metaData->inValidMacro.end()) {
-          metaData->inValidMacro.insert(II->getName().str());
-          break;
-        }
-      }
-    }
-  }
-  // IClang end
 
   if (MacroShadowsKeyword &&
       !isConfigurationPattern(MacroNameTok, MI, getLangOpts())) {

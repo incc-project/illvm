@@ -342,12 +342,6 @@ static IdentifierInfo *RegisterBuiltinMacro(Preprocessor &PP, const char *Name){
 /// identifier table.
 void Preprocessor::RegisterBuiltinMacros() {
   Ident__LINE__ = RegisterBuiltinMacro(*this, "__LINE__");
-  // IClang begin
-  const auto &global = iclang::Global::getInstance();
-  if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
-    Ident__ICLANGLINE__ = RegisterBuiltinMacro(*this, "__ICLANGLINE__");
-  }
-  // IClang end
   Ident__FILE__ = RegisterBuiltinMacro(*this, "__FILE__");
   Ident__DATE__ = RegisterBuiltinMacro(*this, "__DATE__");
   Ident__TIME__ = RegisterBuiltinMacro(*this, "__TIME__");
@@ -1523,10 +1517,7 @@ void Preprocessor::ExpandBuiltinMacro(Token &Tok) {
   bool IsAtStartOfLine = Tok.isAtStartOfLine();
   bool HasLeadingSpace = Tok.hasLeadingSpace();
 
-  // IClang begin.
-  if (II == Ident__LINE__ || II == Ident__ICLANGLINE__) {
-    // IClang end.
-
+  if (II == Ident__LINE__) {
     // C99 6.10.8: "__LINE__: The presumed line number (within the current
     // source file) of the current source line (an integer constant)".  This can
     // be affected by #line.
@@ -1544,8 +1535,18 @@ void Preprocessor::ExpandBuiltinMacro(Token &Tok) {
     Loc = SourceMgr.getExpansionRange(Loc).getEnd();
     PresumedLoc PLoc = SourceMgr.getPresumedLoc(Loc);
 
-    // __LINE__ expands to a simple numeric value.
-    OS << (PLoc.isValid()? PLoc.getLine() : 1);
+    // IClang begin.
+    auto &global = iclang::Global::getInstance();
+    if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
+      auto metaData = global.getMetaData<iclang::IncLineCheckMetaData>();
+      metaData->skipMacroNum += 1;
+      OS << 1;
+    } else {
+      // __LINE__ expands to a simple numeric value.
+      OS << (PLoc.isValid()? PLoc.getLine() : 1);
+    }
+    // IClang end.
+
     Tok.setKind(tok::numeric_constant);
   } else if (II == Ident__FILE__ || II == Ident__BASE_FILE__ ||
              II == Ident__FILE_NAME__) {

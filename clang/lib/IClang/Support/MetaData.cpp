@@ -284,14 +284,8 @@ llvm::json::Object BasicFuncXCheckMetaData::serialize() const {
 llvm::json::Object IncLineCheckMetaData::serialize() const {
   auto root = MetaData::serialize();
 
-  root["hashHashFlag"] = hashHashFlag;
-  root["baseFuncDefNum"] = baseFuncDefNum;
-
-  llvm::json::Array arr;
-  for (const auto &macro : inValidMacro) {
-    arr.push_back(macro);
-  }
-  root["inValidMacro"] = llvm::json::Value(std::move(arr));
+  root["skipMacroNum"] = skipMacroNum;
+  root["skipBuiltinNum"] = skipBuiltinNum;
 
   return root;
 }
@@ -299,34 +293,8 @@ llvm::json::Object IncLineCheckMetaData::serialize() const {
 void IncLineCheckMetaData::deserialize(llvm::json::Object &root) {
   MetaData::deserialize(root);
 
-  hashHashFlag = root["hashHashFlag"].getAsBoolean().value();
-  baseFuncDefNum = root["baseFuncDefNum"].getAsInteger().value();
-
-  auto *arr = root["inValidMacro"].getAsArray();
-  ILLVM_FCHECK(arr != nullptr,
-                    "Failed to parse JSON: Can not convert inValidMacro to "
-                    "json array");
-
-  inValidMacro.clear();
-  for (const auto &macro : *arr) {
-    inValidMacro.insert(macro.getAsString().value().str());
-  }
-}
-
-llvm::json::Object LineMacroCheckMetaData::serialize() const {
-  auto root = MetaData::serialize();
-
-  root["totalFuncNum"] = totalFuncNum;
-  root["funcWithLineMacroNum"] = funcWithLineMacroNum;
-
-  return root;
-}
-
-void LineMacroCheckMetaData::deserialize(llvm::json::Object &root) {
-  MetaData::deserialize(root);
-
-  totalFuncNum = root["totalFuncNum"].getAsInteger().value();
-  funcWithLineMacroNum = root["funcWithLineMacroNum"].getAsInteger().value();
+  skipMacroNum = root["skipMacroNum"].getAsInteger().value();
+  skipBuiltinNum = root["skipBuiltinNum"].getAsInteger().value();
 }
 
 } // namespace iclang
