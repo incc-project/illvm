@@ -183,6 +183,12 @@ int IncLineCheckDriver::run(
     Global &global, const llvm::SmallVector<const char *, 128> &originalArgv,
     const clang::driver::Driver &clangDriver) {
   assert(global.getIClangMode() == IClangMode::IncLineCheckMode);
+  auto metaData = global.getMetaData<IncLineCheckMetaData>();
+  const auto &skipBinEq = global.getIClangConfig().skipBinEq;
+  const auto it = skipBinEq.find(metaData->inputPath);
+  if (it != skipBinEq.end()) {
+    metaData->skipFlag = true;
+  }
   return DriverBase::runBase(global, originalArgv, clangDriver);
 }
 

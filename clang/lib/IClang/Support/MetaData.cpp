@@ -51,7 +51,6 @@ IClangConfig IClangConfig::load(const std::string &filepath) {
   }
 
   if (auto *arr = root.getArray("pchInfo"); arr != nullptr) {
-    res.pchInfoMap.emplace();
     for (const auto &elem : *arr) {
       const auto *obj = elem.getAsObject();
       ILLVM_FCHECK(
@@ -67,6 +66,18 @@ IClangConfig IClangConfig::load(const std::string &filepath) {
                 "Can not load pchLineOpt from IClang config: " + filepath);
       const int pchLine = *pchLineOpt;
       res.pchInfoMap[srcPath] = pchLine;
+    }
+  }
+
+  if (auto *arr = root.getArray("skipBinEq"); arr != nullptr) {
+    for (const auto &elem : *arr) {
+      const auto absPathOpt = elem.getAsString();
+      ILLVM_FCHECK(
+        absPathOpt.has_value(),
+        "Failed to parse JSON: Can not load skipBinEq elem from IClang config: " +
+            filepath);
+      const auto absPath = absPathOpt->str();
+      res.skipBinEq.insert(absPath);
     }
   }
 

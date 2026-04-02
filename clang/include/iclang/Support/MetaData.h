@@ -42,6 +42,7 @@ public:
   std::optional<std::unordered_set<std::string>> whiteSet;
   std::optional<std::unordered_set<std::string>> blackSet;
   std::unordered_map<std::string, int> pchInfoMap;
+  std::unordered_set<std::string> skipBinEq;
 
   static IClangConfig load(const std::string &filepath);
 };
@@ -348,6 +349,7 @@ class IncLineCheckMetaData : public MetaData {
 public:
   int skipMacroNum = 0;
   int skipBuiltinNum = 0;
+  bool skipFlag = false;
 
   // MetaData
   // skipMacroNum

@@ -1536,15 +1536,17 @@ void Preprocessor::ExpandBuiltinMacro(Token &Tok) {
     PresumedLoc PLoc = SourceMgr.getPresumedLoc(Loc);
 
     // IClang begin.
+    unsigned lineVal = (PLoc.isValid()? PLoc.getLine() : 1);
     auto &global = iclang::Global::getInstance();
     if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
       auto metaData = global.getMetaData<iclang::IncLineCheckMetaData>();
-      metaData->skipMacroNum += 1;
-      OS << 1;
-    } else {
-      // __LINE__ expands to a simple numeric value.
-      OS << (PLoc.isValid()? PLoc.getLine() : 1);
+      if (!metaData->skipFlag) {
+        metaData->skipMacroNum += 1;
+        lineVal = 1;
+      }
     }
+    // __LINE__ expands to a simple numeric value.
+    OS << lineVal;
     // IClang end.
 
     Tok.setKind(tok::numeric_constant);

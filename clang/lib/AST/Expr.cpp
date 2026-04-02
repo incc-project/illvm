@@ -2308,8 +2308,10 @@ APValue SourceLocExpr::EvaluateInContext(const ASTContext &Ctx,
     auto &global = iclang::Global::getInstance();
     if (global.isIClangMode(iclang::IClangMode::IncLineCheckMode)) {
       auto metaData = global.getMetaData<iclang::IncLineCheckMetaData>();
-      metaData->skipBuiltinNum += 1;
-      IntVal = 1;
+      if (!metaData->skipFlag) {
+        metaData->skipBuiltinNum += 1;
+        IntVal = 1;
+      }
     }
     // IClang end
     return APValue(IntVal);
